@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MaintainerAgentOutput",
+  "type": "object",
+  "required": ["repo", "issue_type", "severity", "confidence", "duplicate_of", "labels", "draft_reply", "needs_human"],
+  "properties": {
+    "repo": { "type": "string", "description": "owner/name, must match repos.yaml id" },
+    "issue_type": { "type": "string", "enum": ["bug", "piece-request", "feature", "docs", "question", "spam", "duplicate"] },
+    "severity": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "duplicate_of": { "type": ["integer", "null"] },
+    "labels": { "type": "array", "items": { "type": "string" } },
+    "draft_reply": { "type": "string", "minLength": 10, "maxLength": 2000 },
+    "needs_human": { "type": "boolean" }
+  },
+  "allOf": [
+    { "if": { "properties": { "severity": { "const": "P0" } } }, "then": { "properties": { "needs_human": { "const": true } } } }
+  ]
+}
