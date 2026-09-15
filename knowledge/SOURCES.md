@@ -7,12 +7,15 @@
 - [ ] repo: CONTRIBUTING.md (link when ingested)
 
 ## kb_vibecode
-- [ ] README sections (paste link after upload)
+- [ ] https://github.com/Deepjyoti-Sarmah/VibeCode (README: Next.js + tRPC + Prisma + Inngest + E2B)
+- [ ] https://www.activepieces.com/docs/agents/tools (agent tool calling reference for parity)
 
 ## kb_invoice_cart
-- [ ] README sections
+- [ ] https://github.com/Deepjyoti-Sarmah/Invoice-Cart (README: invoicing CRUD, GST line items)
+- [ ] https://www.activepieces.com/docs/tables/overview (Tables patterns for invoice memory)
 
 ## kb_symbolgraph
-- [ ] README + MCP server section
+- [ ] https://github.com/Deepjyoti-Sarmah/symbolgraph (README + MCP server section)
+- [ ] https://www.activepieces.com/docs/mcp/overview (MCP server setup reference)
 
 > Tick when uploaded + retrieval spot-checked (ask KB one question per repo, save answer id).

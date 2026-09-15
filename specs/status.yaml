@@ -11,7 +11,7 @@ specs:
       - specs/001-maintainer-agent/contracts/output.schema.json
     notes: ""
   002-multi-repo:
-    status: pending
+    status: in_progress
     files:
       - specs/002-multi-repo/spec.md
       - specs/002-multi-repo/tasks.md
@@ -29,13 +29,13 @@ specs:
       - flows/mcp-maintainer-entry.json
     notes: "exports land here after Cloud build; placeholders fail verify until real exports"
   004-web-ui:
-    status: pending
+    status: in_progress
     files:
       - specs/004-web-ui/spec.md
       - specs/004-web-ui/tasks.md
       - apps/web/package.json
       - .env.example
-    notes: "vercel_url: "
+    notes: "vercel_url: (pending deploy); mock verified keyless: build green, /chat + /runs 200, unknown_repo 400, 429 past 10/min"
   005-evals-guardrails:
     status: in_progress
     files:
