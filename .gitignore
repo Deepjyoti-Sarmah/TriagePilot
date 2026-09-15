@@ -3,3 +3,7 @@
 apps/web/.next/
 apps/web/node_modules/
 __pycache__/
+# agent skill installs (tooling, not product)
+.agents/
+.claude/
+skills-lock.json
