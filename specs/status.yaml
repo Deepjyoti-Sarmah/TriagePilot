@@ -37,10 +37,10 @@ specs:
       - .env.example
     notes: "vercel_url: "
   005-evals-guardrails:
-    status: pending
+    status: in_progress
     files:
       - specs/005-evals-guardrails/spec.md
       - specs/005-evals-guardrails/tasks.md
       - specs/001-maintainer-agent/evals/dataset.jsonl
       - specs/005-evals-guardrails/thresholds.yaml
-    notes: ""
+    notes: "dataset 80/80 (20 per repo), eval_report.py green; live guardrail proofs + cost column pending API keys"

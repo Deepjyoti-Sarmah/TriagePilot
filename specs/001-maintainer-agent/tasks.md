@@ -5,7 +5,7 @@
 ## Prompt + contracts
 
 - [ ] `agent.prompt.md` drafted and pasted into Cloud agent (v1)
-- [ ] `contracts/output.schema.json` validates 3 sample outputs (run `verify.py`)
+- [x] `contracts/output.schema.json` validates 3 sample outputs (run `verify.py`)
 - [ ] `tools.matrix.md` reviewed: no tool has write access without approval note
 
 ## Cloud agent setup
@@ -17,5 +17,5 @@
 
 ## Evals seed
 
-- [ ] `evals/dataset.jsonl` has ≥5 starter rows (full 20/repo lands in spec 005, but format locked here)
+- [x] `evals/dataset.jsonl` has ≥5 starter rows (full 20/repo lands in spec 005, but format locked here) — done: 80 rows, see evals/README.md
 - [ ] Each row has keys: `repo, issue_url, expected_type, expected_severity, is_duplicate`
