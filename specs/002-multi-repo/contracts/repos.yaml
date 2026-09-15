@@ -1,0 +1,33 @@
+# repos.yaml — registry, source of truth for multi-repo behavior.
+# Adding a repo = append one item. No code change.
+- id: activepieces/activepieces
+  kb_id: kb_activepieces
+  labels: [bug, piece-request, docs, question, spam, duplicate]
+  channel: "#ap-maintainers"
+  tone: concise maintainer, link docs
+  p0_definition: auth/outage breakage or 5+ same reports in 24h
+  docs:
+    - https://www.activepieces.com/docs/overview/welcome
+    - https://www.activepieces.com/docs/agents/overview
+    - https://www.activepieces.com/docs/build-pieces/building-pieces/overview
+- id: Deepjyoti-Sarmah/VibeCode
+  kb_id: kb_vibecode
+  labels: [bug, feature, docs, question, duplicate]
+  channel: "#vibecode"
+  tone: friendly builder
+  p0_definition: deploy/sandbox outage
+  docs: []
+- id: Deepjyoti-Sarmah/Invoice-Cart
+  kb_id: kb_invoice_cart
+  labels: [bug, feature, docs, question, duplicate]
+  channel: "#invoice-cart"
+  tone: friendly builder
+  p0_definition: billing/data-loss bug
+  docs: []
+- id: Deepjyoti-Sarmah/symbolgraph
+  kb_id: kb_symbolgraph
+  labels: [bug, feature, docs, question, duplicate]
+  channel: "#symbolgraph"
+  tone: technical, terse
+  p0_definition: MCP server crash
+  docs: []
