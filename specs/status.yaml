@@ -1,0 +1,46 @@
+# status.yaml — single progress tracker. Edit status only.
+# pending | in_progress | done | verified (verified = verify.py passed)
+specs:
+  001-maintainer-agent:
+    status: in_progress
+    files:
+      - specs/001-maintainer-agent/spec.md
+      - specs/001-maintainer-agent/agent.prompt.md
+      - specs/001-maintainer-agent/tools.matrix.md
+      - specs/001-maintainer-agent/tasks.md
+      - specs/001-maintainer-agent/contracts/output.schema.json
+    notes: ""
+  002-multi-repo:
+    status: pending
+    files:
+      - specs/002-multi-repo/spec.md
+      - specs/002-multi-repo/tasks.md
+      - specs/002-multi-repo/contracts/repos.yaml
+      - tables/schema.sql
+      - knowledge/SOURCES.md
+    notes: ""
+  003-flows:
+    status: pending
+    files:
+      - specs/003-flows/spec.md
+      - specs/003-flows/tasks.md
+      - flows/webhook-github-intake.json
+      - flows/daily-digest.json
+      - flows/mcp-maintainer-entry.json
+    notes: "exports land here after Cloud build; placeholders fail verify until real exports"
+  004-web-ui:
+    status: pending
+    files:
+      - specs/004-web-ui/spec.md
+      - specs/004-web-ui/tasks.md
+      - apps/web/package.json
+      - .env.example
+    notes: "vercel_url: "
+  005-evals-guardrails:
+    status: pending
+    files:
+      - specs/005-evals-guardrails/spec.md
+      - specs/005-evals-guardrails/tasks.md
+      - specs/001-maintainer-agent/evals/dataset.jsonl
+      - specs/005-evals-guardrails/thresholds.yaml
+    notes: ""
