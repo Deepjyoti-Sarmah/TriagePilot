@@ -1,0 +1,4 @@
+type_accuracy_min: 0.8
+conf_gate: 0.7
+dedupe_threshold: 0.85
+max_latency_s_p95: 60
