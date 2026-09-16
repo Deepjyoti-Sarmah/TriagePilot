@@ -66,4 +66,4 @@ specs:
       - apps/web/lib/providers/direct.ts
       - apps/web/lib/providers/index.ts
       - apps/web/app/api/run-agent/route.ts
-    notes: ""
+    notes: "strict 18/18 green 2026-09-19: registry live, bogus→400, nokey→501, smoke 10/10"
