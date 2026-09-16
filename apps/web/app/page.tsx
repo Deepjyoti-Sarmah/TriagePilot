@@ -201,7 +201,7 @@ export default function Home() {
       </div>
 
       {/* stat strip */}
-      <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line lg:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line lg:grid-cols-4">
         {STATS.map(([big, label, sub]) => (
           <div key={label} className="bg-panel px-5 py-4">
             <div className="font-display text-3xl font-bold text-white">

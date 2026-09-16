@@ -90,11 +90,11 @@ export default async function RunsPage() {
             }`}
           >
             <div className="strip-holes w-3 shrink-0 opacity-80" aria-hidden />
-            <div className="grid min-w-0 flex-1 grid-cols-[1fr_auto] items-center gap-x-5 gap-y-1 px-4 py-3 sm:grid-cols-[130px_1fr_auto_auto_auto]">
-              <span className="font-mono text-[13px] font-bold text-lime-950">
+            <div className="flex min-w-0 flex-1 flex-col gap-1 px-4 py-3 sm:grid sm:grid-cols-[130px_1fr_auto_auto_auto] sm:items-center sm:gap-x-5">
+              <span className="order-first font-mono text-[13px] font-bold text-lime-950">
                 {r.run_id}
               </span>
-              <span className="col-span-2 truncate font-mono text-[13px] sm:col-span-1">
+              <span className="truncate font-mono text-[13px]">
                 {r.repo}
               </span>
               <span className="font-mono text-[13px] font-bold uppercase">

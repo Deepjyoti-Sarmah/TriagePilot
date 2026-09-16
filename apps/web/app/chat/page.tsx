@@ -79,14 +79,15 @@ function TriageConsole() {
   const out = verdict?.output;
 
   return (
-    <div className="grid gap-6 pt-10 lg:grid-cols-[360px_1fr]">
+    <div className="pt-10">
+      <Eyebrow>Strip bay · file an issue</Eyebrow>
+      <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
+        Print a strip
+      </h1>
+      <div className="mt-5 grid items-start gap-6 lg:grid-cols-[360px_1fr]">
       {/* console */}
       <div>
-        <Eyebrow>Strip bay · file an issue</Eyebrow>
-        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
-          Print a strip
-        </h1>
-        <Card className="mt-5 space-y-4 p-5">
+        <Card className="space-y-4 p-5">
           <Field label="Sector / repository">
             <select
               value={repo}
@@ -142,7 +143,7 @@ function TriageConsole() {
       </div>
 
       {/* verdict */}
-      <div className="lg:pt-[76px]">
+      <div>
         {verdict?.mode === "mock" && (
           <div className="mb-3 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-2.5 text-sm text-amber-300">
             MOCK feed — deterministic demo strips in the exact live shape.
@@ -197,7 +198,7 @@ function TriageConsole() {
                   </span>
                 </div>
                 <div className="tear-x my-3" />
-                <div className="grid grid-cols-3 gap-3 font-mono text-xs">
+                <div className="grid grid-cols-1 gap-2 font-mono text-xs min-[480px]:grid-cols-3 min-[480px]:gap-3">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.18em] text-black/50">
                       Confidence
@@ -257,6 +258,7 @@ function TriageConsole() {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }
