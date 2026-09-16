@@ -10,7 +10,7 @@
 
 ## Cloud agent setup
 
-- [ ] Agent created in Cloud project, model `gpt-4o`, `maxSteps: 12`, `webSearch: on`
+- [ ] Agent created in Cloud project, provider OpenRouter, model `qwen/qwen3.8-27b:free`, `maxSteps: 12`, `webSearch: on`
 - [ ] `structuredOutput` set from `output.schema.json`
 - [ ] Live test: triaged 1 real Activepieces issue in `agent-test-step`, output saved to `evals/sample-run-001.json`
 - [ ] Low-confidence case (`conf < 0.7`) correctly sets `needs_human: true` (1 proof run)

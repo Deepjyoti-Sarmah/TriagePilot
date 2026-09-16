@@ -2,7 +2,24 @@
 
 ## 1. Title
 
-Triage any GitHub issue with a ReAct agent (gpt-4o + per-repo KB).
+Triage any GitHub issue with a ReAct agent (OpenRouter free model + per-repo KB).
+
+## 0. Model decision (2026-09-19, verified)
+
+- Provider: **OpenRouter** (first-class in Activepieces since 0.74.0:
+  Platform Admin → AI Center → OpenRouter, usable in Agents).
+- Model: **`qwen/qwen3.8-27b:free`** — verified on the OpenRouter models API:
+  $0 in/out, 262K context, plenty for 12 tool steps + KB chunks.
+- Why free-first: evals + demo run at $0; paid fallback only if the
+  accuracy gate fails.
+- Known limits: free-tier rate caps (~tens of req/min, daily quotas) → run
+  the 80-row eval sweep in small batches; tool-calling is weaker than
+  `gpt-4o`, so the **type-accuracy > 0.8 gate stays** and every run logs
+  `provider/model` — a miss is a finding, not a surprise.
+- Fallback: `gpt-4o` via OpenAI provider if the gate fails twice.
+  KB embeddings need an embedding-compatible provider (OpenAI/Google/
+  Azure/OpenRouter); confirm OpenRouter embeddings or keep one OpenAI
+  key just for embeddings at D2.
 
 ## 2. Problem
 

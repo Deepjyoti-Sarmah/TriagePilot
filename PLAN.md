@@ -1,7 +1,7 @@
 # PLAN — Multi-Repo Maintainer Agent (Activepieces AI Agent)
 
 > Flagship: `activepieces/activepieces` triage. Agent-first, not flow-first.
-> Stack: Activepieces Cloud (Agent + Flows + Tables + KB + MCP) + Vercel Next.js + OpenAI `gpt-4o`.
+> Stack: Activepieces Cloud (Agent + Flows + Tables + KB + MCP) + Vercel Next.js + OpenRouter `qwen/qwen3.8-27b:free` ($0).
 > Method: spec-driven. Every build step maps to a file in `specs/`. Nothing is "done" until `scripts/verify.py` says so.
 
 ## 1. What we are building (simple)
@@ -28,7 +28,7 @@ Flow draws steps once. Agent figures out steps each run (ReAct loop, `maxSteps: 
 ```
 Vercel /chat {repo, issue_url} → POST /api/run-agent
   → Cloud flow `mcp-maintainer-entry` [MCP Trigger, returnsResponse:true]
-    → Agent Step [gpt-4o, maxSteps 12, structuredOutput]
+    → Agent Step [openrouter/qwen3.8-27b:free, maxSteps 12, structuredOutput]
     → Branch needs_human? → Approval → Slack/Discord post
   → Tables: repos, issues_memory, runs, digests
 MCP Server ON (Discovery + Tables read-only first)
@@ -62,7 +62,7 @@ Progress: `specs/status.yaml`. Verification: `specs/_system/verification.md` + `
 ## 6. Secrets (you provide later — nothing hard-coded)
 
 Needed in Cloud dashboard + Vercel env (server-only), never in client:
-`AP_API_KEY`, `OPENAI_API_KEY`, `GITHUB_PAT (repo scope)`, `SLACK_WEBHOOK_URL`, `DISCORD_WEBHOOK_URL`, `AP_PROJECT_ID`, `AP_MCP_URL`.
+`AP_API_KEY`, `OPENROUTER_API_KEY` (free tier OK), `GITHUB_PAT (repo scope)`, `SLACK_WEBHOOK_URL`, `DISCORD_WEBHOOK_URL`, `AP_PROJECT_ID`, `AP_MCP_URL`.
 
 Placeholders live in `.env.example` (to be created in D1/D5). App refuses to run without them, with a clear error.
 

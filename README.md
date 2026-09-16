@@ -1,6 +1,6 @@
 # Activepieces-ai — Multi-Repo Maintainer Agent
 
-AI-agent-first showcase for Activepieces: one ReAct agent (`gpt-4o`, `maxSteps: 12`) triages GitHub issues for N repos, with human approval before any post. Gravity-style demo on Vercel.
+AI-agent-first showcase for Activepieces: one ReAct agent (OpenRouter `qwen/qwen3.8-27b:free`, `maxSteps: 12`) triages GitHub issues for N repos, with human approval before any post. Gravity-style demo on Vercel.
 
 Start here: `PLAN.md` → `specs/README.md` → `specs/001-maintainer-agent/spec.md`.
 
