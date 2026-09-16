@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { RunAgentInput, TriageOutput, MISSING_CONFIG } from "@/lib/schema";
 import { isKnownRepo } from "@/lib/repos";
-import { mockTriage } from "@/lib/mock";
+import { resolveProvider } from "@/lib/providers";
 
 // Demo-only in-memory rate limit: 10 req/min/IP. Replace with Redis/Upstash in prod.
 const hits = new Map<string, { count: number; resetAt: number }>();
@@ -17,14 +17,6 @@ function rateLimited(ip: string): boolean {
   }
   cur.count += 1;
   return cur.count > LIMIT;
-}
-
-function isConfigured(): boolean {
-  return Boolean(
-    process.env.AP_API_KEY &&
-      process.env.AP_PROJECT_ID &&
-      process.env.AP_MCP_URL
-  );
 }
 
 export async function POST(req: NextRequest) {
@@ -57,21 +49,36 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Live path (D4, needs keys): POST to the MCP-entry flow, return structured JSON.
-  // Until keys exist we serve deterministic mock output in the exact same shape.
-  if (!isConfigured()) {
-    const output = TriageOutput.parse(mockTriage(repo, issue_url));
-    return NextResponse.json({
-      ...MISSING_CONFIG,
-      mode: "mock",
-      run_id: `mock-${Date.now()}`,
-      output,
-    });
+  let provider;
+  try {
+    provider = resolveProvider();
+  } catch (e) {
+    const err = e as Error & { status?: number; code?: string };
+    return NextResponse.json(
+      { error: err.code ?? "unknown_provider", message: err.message },
+      { status: err.status ?? 400 }
+    );
   }
 
-  // Placeholder for the live call — fails closed, never leaks keys to client.
-  return NextResponse.json(
-    { error: "not_wired", message: "Live MCP-entry call lands in D4." },
-    { status: 501 }
-  );
+  try {
+    const { output, meta } = await provider.triage({ repo, issue_url });
+    const checked = TriageOutput.parse(output);
+    return NextResponse.json({
+      ...(meta.mode === "mock" ? MISSING_CONFIG : {}),
+      mode: meta.mode,
+      run_id: `${meta.provider}-${Date.now()}`,
+      output: checked,
+      meta,
+    });
+  } catch (e) {
+    const err = e as Error & { status?: number; code?: string };
+    return NextResponse.json(
+      {
+        error: err.code ?? "provider_error",
+        message: err.message,
+        meta: { provider: provider.name, model: provider.model },
+      },
+      { status: err.status ?? 502 }
+    );
+  }
 }

@@ -54,3 +54,16 @@ specs:
       - .github/workflows/ci.yml
       - DEMO.md
     notes: "strict 13/13 green 2026-09-19: smoke 10/10, sync ok, CI parses, demo+rundoc done"
+  007-provider-backend:
+    status: verified
+    files:
+      - specs/007-provider-backend/spec.md
+      - specs/007-provider-backend/tasks.md
+      - specs/007-provider-backend/contracts/direct.prompt.md
+      - apps/web/lib/providers/types.ts
+      - apps/web/lib/providers/mock.ts
+      - apps/web/lib/providers/activepieces.ts
+      - apps/web/lib/providers/direct.ts
+      - apps/web/lib/providers/index.ts
+      - apps/web/app/api/run-agent/route.ts
+    notes: ""

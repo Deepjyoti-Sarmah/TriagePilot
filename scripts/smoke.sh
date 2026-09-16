@@ -22,8 +22,10 @@ trap cleanup EXIT
 
 cd "$WEB_DIR"
 
-if [ ! -f .next/BUILD_ID ]; then
-  echo "— no production build, building…"
+# Rebuild when missing OR any source is newer than the last build
+# (stale servers are the #1 smoke false-negative).
+if [ ! -f .next/BUILD_ID ] || [ -n "$(find app lib components public package.json tsconfig.json next.config.mjs postcss.config.mjs -newer .next/BUILD_ID 2>/dev/null)" ]; then
+  echo "— (re)building…"
   npm run build >/tmp/smoke-build.log 2>&1 || { bad "next build" "$(tail -3 /tmp/smoke-build.log)"; exit 1; }
 fi
 ok "next build present"
@@ -58,10 +60,12 @@ echo "$resp" | python3 -c "
 import json,sys
 d = json.load(sys.stdin)
 o = d.get('output', {})
+m = d.get('meta', {})
 assert o.get('issue_type') == 'bug' and o.get('severity') == 'P1', d
 assert 0 <= o.get('confidence', -1) <= 1 and isinstance(o.get('needs_human'), bool)
-print('mock verdict shape ok:', o['issue_type'], o['severity'])
-" && ok "POST valid → bug/P1 mock" || bad "POST valid → bug/P1 mock" "$resp"
+assert m.get('provider') == 'mock' and 'latency_ms' in m, d
+print('mock verdict+meta ok:', o['issue_type'], o['severity'], m['provider'])
+" && ok "POST valid → bug/P1 mock + meta" || bad "POST valid → bug/P1 mock + meta" "$resp"
 
 # unknown repo → 400
 code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 -X POST "$BASE/api/run-agent" \

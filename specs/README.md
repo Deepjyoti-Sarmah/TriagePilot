@@ -30,6 +30,10 @@ specs/
   006-keyless-hardening/
     spec.md                # proof without keys: smoke, sync, CI, demo
     tasks.md
+  007-provider-backend/
+    spec.md                # env-selected providers, meta on every run
+    tasks.md
+    contracts/direct.prompt.md
   status.yaml              # progress tracker (single file)
 ```
 

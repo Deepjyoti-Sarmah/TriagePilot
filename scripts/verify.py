@@ -153,6 +153,28 @@ def check_repo_sync():
         report("repos:sync", False,
                f"ts-only={sorted(ts_ids - yaml_ids)} yaml-only={sorted(yaml_ids - ts_ids)}")
 
+def check_providers():
+    """Every lib/providers/*.ts must export a triage provider (spec 007)."""
+    base = ROOT / "apps/web/lib/providers"
+    if not base.exists():
+        report("providers:dir", False, "lib/providers missing")
+        return
+    files = sorted(p for p in base.glob("*.ts") if p.name not in ("types.ts", "index.ts"))
+    if not files:
+        report("providers:any", False, "no provider implementations")
+        return
+    for p in files:
+        text = p.read_text()
+        has_iface = "TriageProvider" in text
+        has_triage = bool(re.search(r"\btriage\b", text))
+        # named export either as literal (`name: "x"`) or factory (`makeDirect("x")`)
+        has_name = bool(re.search(r'\bname:\s*"', text)) or bool(
+            re.search(r"export const \w+[Pp]rovider", text)
+        )
+        ok = has_iface and has_triage and has_name
+        report(f"providers:{p.stem}", ok,
+               "exports TriageProvider with triage()" if ok else "missing TriageProvider/triage/name")
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--spec", default=None, help="only check one spec key, e.g. 001-maintainer-agent")
@@ -186,6 +208,7 @@ def main():
             check_tasks(f"specs/{key}/tasks.md", args.strict)
         check_evals(args.strict)
         check_repo_sync()
+        check_providers()
         check_secrets()
 
     failed = [r for r in results if not r[1]]

@@ -17,6 +17,7 @@ CREATE TABLE issues_memory (
   PRIMARY KEY (repo, github_id)
 );
 -- runs: audit log, idempotency on (repo, github_id)
+-- provider/model stamped per spec 007 (mock|activepieces|openrouter|openai)
 CREATE TABLE runs (
   run_id TEXT PRIMARY KEY,
   repo TEXT NOT NULL,
@@ -26,6 +27,8 @@ CREATE TABLE runs (
   confidence REAL,
   latency_ms INTEGER,
   tokens INTEGER,
+  provider TEXT NOT NULL DEFAULT 'mock',
+  model TEXT NOT NULL DEFAULT 'mock/deterministic-v1',
   approved_by TEXT,
   created_at TEXT NOT NULL
 );

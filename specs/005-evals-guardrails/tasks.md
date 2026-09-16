@@ -4,4 +4,4 @@
 - [x] `thresholds.yaml` created: `type_accuracy_min: 0.8, conf_gate: 0.7, dedupe_threshold: 0.85`
 - [ ] `verify.py --strict` passes (counts + schema + secret scan)
 - [ ] Live guardrail proof: 1 low-conf run + 1 duplicate-webhook run saved with run ids
-- [ ] Cost column present in `runs` (tokens + latency logged)
+- [ ] Cost column present in `runs` (tokens + latency + provider/model per spec 007)
