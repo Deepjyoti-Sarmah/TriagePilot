@@ -134,6 +134,25 @@ def check_secrets():
                     break
     report("secrets:clean", not hits, f"hits={hits[:4]}" if hits else "no literals found")
 
+def check_repo_sync():
+    """apps/web/lib/repos.ts ids must equal repos.yaml ids (spec 002 <-> 004)."""
+    ts_path = ROOT / "apps/web/lib/repos.ts"
+    yaml_path = ROOT / "specs/002-multi-repo/contracts/repos.yaml"
+    if not ts_path.exists() or not yaml_path.exists():
+        report("repos:sync", False, "repos.ts or repos.yaml missing")
+        return
+    ts_ids = set(re.findall(r'id:\s*"([^"]+)"', ts_path.read_text()))
+    data = load_yaml_minimal(yaml_path)
+    if not isinstance(data, list):
+        report("repos:sync", False, "repos.yaml unreadable (need pyyaml)")
+        return
+    yaml_ids = {r.get("id") for r in data if isinstance(r, dict)}
+    if ts_ids == yaml_ids:
+        report("repos:sync", True, f"{len(yaml_ids)} repos match")
+    else:
+        report("repos:sync", False,
+               f"ts-only={sorted(ts_ids - yaml_ids)} yaml-only={sorted(yaml_ids - ts_ids)}")
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--spec", default=None, help="only check one spec key, e.g. 001-maintainer-agent")
@@ -166,6 +185,7 @@ def main():
             # tasks.md for this spec
             check_tasks(f"specs/{key}/tasks.md", args.strict)
         check_evals(args.strict)
+        check_repo_sync()
         check_secrets()
 
     failed = [r for r in results if not r[1]]

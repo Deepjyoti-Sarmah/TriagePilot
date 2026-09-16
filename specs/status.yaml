@@ -44,3 +44,13 @@ specs:
       - specs/001-maintainer-agent/evals/dataset.jsonl
       - specs/005-evals-guardrails/thresholds.yaml
     notes: "dataset 80/80 (20 per repo), eval_report.py green; live guardrail proofs + cost column pending API keys"
+  006-keyless-hardening:
+    status: verified
+    files:
+      - specs/006-keyless-hardening/spec.md
+      - specs/006-keyless-hardening/tasks.md
+      - scripts/smoke.sh
+      - scripts/verify.py
+      - .github/workflows/ci.yml
+      - DEMO.md
+    notes: "strict 13/13 green 2026-09-19: smoke 10/10, sync ok, CI parses, demo+rundoc done"

@@ -27,6 +27,9 @@ specs/
   005-evals-guardrails/
     spec.md
     tasks.md
+  006-keyless-hardening/
+    spec.md                # proof without keys: smoke, sync, CI, demo
+    tasks.md
   status.yaml              # progress tracker (single file)
 ```
 

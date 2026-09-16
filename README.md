@@ -12,8 +12,24 @@ python3 scripts/verify.py
 python3 scripts/verify.py --spec 001-maintainer-agent
 python3 scripts/verify.py --strict   # full gate before publish
 
-# 2. Work a spec: implement its tasks.md, re-run verifier, update specs/status.yaml
+# 2. One-command runtime proof (no keys needed)
+bash scripts/smoke.sh 3210
+
+# 3. Work a spec: implement its tasks.md, re-run verifier, update specs/status.yaml
 ```
+
+## What runs without keys vs what is blocked
+
+| Runs keyless now | Blocked on keys |
+|---|---|
+| `verify.py` all structural gates + eval counts | Cloud agent creation + live tests (`001`) |
+| `eval_report.py` 80-row distribution | Tables creation, KB upload, isolation proofs (`002`) |
+| Web app in MOCK mode: `/chat /runs /repos/new` | 3 flow exports (`003`) |
+| `smoke.sh` full runtime asserts | Live MCP-entry calls, Vercel URL (`004`) |
+| `DEMO.md` 5-minute walkthrough | Accuracy + live guardrail proofs (`005`) |
+
+Keyed work starts the day secrets land (`.env.example` lists them).
+Demo path: `DEMO.md`.
 
 ## Layout
 
