@@ -74,7 +74,7 @@ export default function NewRepoPage() {
             {["01 · YAML", "02 · KB upload", "03 · 20 evals"].map((s) => (
               <div
                 key={s}
-                className="rounded-md border border-line bg-ink px-2 py-2 text-center font-mono text-[11px] text-zinc-500"
+                className="rounded-md border border-line bg-ink px-2 py-2 text-center font-mono text-[11px] text-zinc-400"
               >
                 {s}
               </div>
@@ -84,7 +84,7 @@ export default function NewRepoPage() {
 
         <Card className="flex flex-col p-4">
           <div className="mb-2 flex items-center justify-between">
-            <p className="font-mono text-[11px] uppercase tracking-wider text-zinc-600">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-zinc-500">
               Live preview
             </p>
             <CopyButton text={yaml} label="Copy YAML" />

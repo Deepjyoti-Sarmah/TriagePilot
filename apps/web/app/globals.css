@@ -65,10 +65,10 @@ body {
 .kbd {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: #8b8b94;
-  border: 1px solid var(--color-line);
+  color: #d4d4d8;
+  border: 1px solid #3a3a43;
   border-bottom-width: 2px;
   border-radius: 5px;
   padding: 1px 5px;
-  background: #131316;
+  background: #17171b;
 }

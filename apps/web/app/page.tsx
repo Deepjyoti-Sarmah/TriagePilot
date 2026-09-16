@@ -44,7 +44,7 @@ export default function Home() {
             Open triage
           </a>
           <GhostButton href="/runs">Run history</GhostButton>
-          <span className="inline-flex items-center gap-2 px-1 font-mono text-xs text-zinc-600">
+          <span className="inline-flex items-center gap-2 px-1 font-mono text-xs text-zinc-500">
             <span className="kbd">/</span> focuses input · <span className="kbd">⌘↵</span> runs
           </span>
         </div>
@@ -57,7 +57,7 @@ export default function Home() {
       <div className="mt-10 grid gap-3 md:grid-cols-3">
         {STEPS.map(([title, body], i) => (
           <Card key={title} className="p-4">
-            <p className="font-mono text-xs text-zinc-600">0{i + 1}</p>
+            <p className="font-mono text-xs text-zinc-500">0{i + 1}</p>
             <h3 className="mt-1.5 text-[15px] font-semibold">{title}</h3>
             <p className="mt-1.5 text-sm leading-relaxed text-zinc-400">{body}</p>
           </Card>
@@ -69,7 +69,7 @@ export default function Home() {
         <Card className="mt-3 overflow-hidden">
           <table className="w-full min-w-[560px] text-sm">
             <thead>
-              <tr className="border-b border-line text-left font-mono text-[11px] uppercase tracking-wider text-zinc-600">
+              <tr className="border-b border-line text-left font-mono text-[11px] uppercase tracking-wider text-zinc-500">
                 <th className="px-4 py-2.5 font-medium">repo</th>
                 <th className="px-4 py-2.5 font-medium">profile</th>
                 <th className="px-4 py-2.5 font-medium">labels</th>
@@ -81,7 +81,7 @@ export default function Home() {
                 <tr key={id} className="border-b border-line/60 last:border-0 hover:bg-white/[0.02]">
                   <td className="px-4 py-2.5 font-mono text-[13px] text-zinc-100">{id}</td>
                   <td className="px-4 py-2.5 text-zinc-400">{profile}</td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-zinc-500">{labels}</td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-zinc-400">{labels}</td>
                   <td className="px-4 py-2.5 text-right">
                     <a
                       href={`/chat?repo=${encodeURIComponent(id)}`}
@@ -99,7 +99,7 @@ export default function Home() {
           <Pill tone="lime">80 eval rows</Pill>
           <Pill>type accuracy gate &gt; 0.8</Pill>
           <Pill>spam + duplicate edge cases</Pill>
-          <span className="font-mono text-xs text-zinc-600">
+          <span className="font-mono text-xs text-zinc-500">
             specs/001-maintainer-agent/evals/dataset.jsonl
           </span>
         </div>

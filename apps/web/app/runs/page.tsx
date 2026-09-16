@@ -44,7 +44,7 @@ export default async function RunsPage() {
       <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line bg-line lg:grid-cols-4">
         {stats.map(([label, big]) => (
           <div key={label} className="bg-panel px-4 py-3">
-            <div className="font-mono text-[11px] uppercase tracking-wider text-zinc-600">
+            <div className="font-mono text-[11px] uppercase tracking-wider text-zinc-500">
               {label}
             </div>
             <div className="mt-0.5 font-mono text-2xl tabular-nums">{big}</div>
@@ -55,7 +55,7 @@ export default async function RunsPage() {
       <Card className="mt-4 p-4">
         <RunsTable runs={runs} />
       </Card>
-      <p className="mt-3 text-[13px] text-zinc-600">
+      <p className="mt-3 text-[13px] text-zinc-400">
         Earnings sim (Gravity narrative): runs × 21.27% share tracked in Tables{" "}
         <code className="font-mono text-xs">earnings_sim</code> once live.
       </p>

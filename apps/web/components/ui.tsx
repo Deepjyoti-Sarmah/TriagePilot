@@ -4,7 +4,7 @@ import { useState, type ReactNode } from "react";
 
 export function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
+    <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-400">
       {children}
     </p>
   );
@@ -29,7 +29,7 @@ const pillTones: Record<string, string> = {
   warn: "bg-amber-400/10 text-amber-300 ring-amber-400/25",
   bad: "bg-red-400/10 text-red-300 ring-red-400/25",
   info: "bg-sky-400/10 text-sky-300 ring-sky-400/25",
-  neutral: "bg-white/[0.04] text-zinc-300 ring-white/10",
+  neutral: "bg-white/[0.05] text-zinc-200 ring-white/20",
   lime: "bg-lime/10 text-lime ring-lime/25",
 };
 
@@ -58,7 +58,7 @@ export function Meter({ value }: { value: number }) {
       <span className="h-1 w-20 overflow-hidden rounded-full bg-white/10">
         <span className={`block h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
       </span>
-      <span className="font-mono text-xs tabular-nums text-zinc-400">{pct}%</span>
+      <span className="font-mono text-xs tabular-nums text-zinc-300">{pct}%</span>
     </span>
   );
 }
@@ -74,9 +74,9 @@ export function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 flex items-baseline justify-between font-mono text-[11px] uppercase tracking-[0.14em] text-zinc-500">
+      <span className="mb-1.5 flex items-baseline justify-between font-mono text-[11px] uppercase tracking-[0.14em] text-zinc-400">
         {label}
-        {hint && <span className="normal-case tracking-normal">{hint}</span>}
+        {hint && <span className="normal-case tracking-normal text-zinc-400">{hint}</span>}
       </span>
       {children}
     </label>
@@ -84,7 +84,7 @@ export function Field({
 }
 
 export const inputCls =
-  "w-full rounded-md border border-line bg-ink px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none transition focus:border-zinc-500 focus:ring-2 focus:ring-white/10";
+  "w-full rounded-md border border-line bg-ink px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-white/15";
 
 export function PrimaryButton({
   children,
@@ -121,7 +121,7 @@ export function GhostButton({
   React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   const { href, ...rest } = props as { href?: string } & Record<string, unknown>;
   const cls =
-    "inline-flex items-center justify-center gap-2 rounded-md border border-line bg-transparent px-4 py-2 text-sm text-zinc-300 transition hover:border-zinc-600 hover:text-white";
+    "inline-flex items-center justify-center gap-2 rounded-md border border-line bg-transparent px-4 py-2 text-sm text-zinc-200 transition hover:border-zinc-500 hover:text-white";
   if (href) {
     return (
       <a href={href} className={cls}>
@@ -155,7 +155,7 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
   return (
     <button
       onClick={copy}
-      className="rounded-md border border-line px-2 py-1 font-mono text-xs text-zinc-400 transition hover:border-zinc-600 hover:text-white"
+      className="rounded-md border border-line px-2 py-1 font-mono text-xs text-zinc-300 transition hover:border-zinc-500 hover:text-white"
       title="Copy to clipboard"
     >
       {done ? "Copied ✓" : label}
@@ -167,7 +167,7 @@ export function CodeBlock({ code, lang = "bash" }: { code: string; lang?: string
   return (
     <div className="overflow-hidden rounded-lg border border-line bg-black">
       <div className="flex items-center justify-between border-b border-line px-3 py-1.5">
-        <span className="font-mono text-[11px] text-zinc-600">{lang}</span>
+        <span className="font-mono text-[11px] text-zinc-500">{lang}</span>
         <CopyButton text={code} />
       </div>
       <pre className="overflow-x-auto p-3.5 font-mono text-[13px] leading-relaxed text-zinc-200">

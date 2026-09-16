@@ -85,7 +85,7 @@ export function RunsTable({ runs }: { runs: Run[] }) {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[680px] text-sm">
             <thead>
-              <tr className="border-b border-line bg-raised/60 text-left font-mono text-[11px] uppercase tracking-wider text-zinc-600">
+              <tr className="border-b border-line bg-raised/60 text-left font-mono text-[11px] uppercase tracking-wider text-zinc-500">
                 <th className="px-4 py-2.5 font-medium">run</th>
                 <th className="px-3 py-2.5 font-medium">repo</th>
                 <th className="px-3 py-2.5 font-medium">verdict</th>
@@ -123,7 +123,7 @@ export function RunsTable({ runs }: { runs: Run[] }) {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-4 py-6 text-center text-sm text-zinc-600">
+                  <td colSpan={6} className="px-4 py-6 text-center text-sm text-zinc-400">
                     No runs match these filters.
                   </td>
                 </tr>
@@ -132,7 +132,7 @@ export function RunsTable({ runs }: { runs: Run[] }) {
           </table>
         </div>
       </div>
-      <p className="mt-2 font-mono text-xs text-zinc-600">
+      <p className="mt-2 font-mono text-xs text-zinc-500">
         {filtered.length}/{runs.length} runs
       </p>
     </div>

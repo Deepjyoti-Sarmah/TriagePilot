@@ -56,7 +56,7 @@ export default function RootLayout({
                 <a
                   key={href}
                   href={href}
-                  className="rounded-md px-2.5 py-1.5 text-zinc-400 transition hover:bg-white/5 hover:text-white"
+                  className="rounded-md px-2.5 py-1.5 text-zinc-300 transition hover:bg-white/5 hover:text-white"
                 >
                   {label}
                 </a>
@@ -70,7 +70,7 @@ export default function RootLayout({
         </header>
         <main className="mx-auto max-w-6xl px-4 pb-16">{children}</main>
         <footer className="border-t border-line">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-4 font-mono text-xs text-zinc-600">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-4 font-mono text-xs text-zinc-500">
             <span>triagepilot · spec-driven · human approves every post</span>
             <span>specs/001 · 80 eval rows · mock until keys land</span>
           </div>

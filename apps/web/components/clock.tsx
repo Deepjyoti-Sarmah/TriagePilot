@@ -16,7 +16,7 @@ export function Clock() {
     return () => clearInterval(id);
   }, []);
   return (
-    <span className="mr-1 hidden font-mono text-xs tabular-nums text-zinc-600 lg:inline">
+    <span className="mr-1 hidden font-mono text-xs tabular-nums text-zinc-500 lg:inline">
       {t}
     </span>
   );

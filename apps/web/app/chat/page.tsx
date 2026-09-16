@@ -128,12 +128,13 @@ function TriageConsole() {
   const rawJson = verdict ? JSON.stringify(verdict, null, 2) : "";
 
   return (
-    <div className="grid gap-6 pt-8 lg:grid-cols-[340px_minmax(0,1fr)_220px]">
+    <div className="pt-8">
+      <Eyebrow>Triage</Eyebrow>
+      <h1 className="mt-2 text-2xl font-semibold tracking-tight">New run</h1>
+      <div className="mt-4 grid items-start gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
       {/* input */}
       <div>
-        <Eyebrow>Triage</Eyebrow>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">New run</h1>
-        <Card className="mt-4 space-y-4 p-4">
+        <Card className="space-y-4 p-4">
           <Field label="Repository">
             <select
               value={repo}
@@ -180,7 +181,7 @@ function TriageConsole() {
             )}
           </PrimaryButton>
           <div>
-            <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.14em] text-zinc-600">
+            <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.14em] text-zinc-400">
               Examples
             </p>
             <div className="flex flex-wrap gap-1.5">
@@ -203,7 +204,7 @@ function TriageConsole() {
 
       {/* result */}
       <div className="min-w-0">
-        <div className="flex h-[52px] items-end justify-between">
+        <div className="mb-3 flex items-center justify-between">
           <Eyebrow>Result</Eyebrow>
           {out && (
             <div className="flex rounded-md border border-line p-0.5 text-xs">
@@ -214,7 +215,7 @@ function TriageConsole() {
                   className={`rounded px-2.5 py-1 font-mono transition ${
                     tab === t
                       ? "bg-white/10 text-white"
-                      : "text-zinc-500 hover:text-zinc-300"
+                      : "text-zinc-400 hover:text-white"
                   }`}
                 >
                   {t === "json" ? "raw JSON" : "verdict"}
@@ -238,7 +239,7 @@ function TriageConsole() {
           )}
           {!verdict && (
             <Card className="border-dashed p-8 text-center">
-              <p className="font-mono text-sm text-zinc-600">
+              <p className="font-mono text-sm text-zinc-400">
                 No run yet — paste a URL and hit <span className="kbd">⌘↵</span>
               </p>
             </Card>
@@ -261,7 +262,7 @@ function TriageConsole() {
               </div>
               <div className="mt-3 grid gap-2.5 border-t border-line pt-3 sm:grid-cols-3">
                 <div>
-                  <p className="font-mono text-[11px] uppercase tracking-wider text-zinc-600">
+                  <p className="font-mono text-[11px] uppercase tracking-wider text-zinc-400">
                     Confidence
                   </p>
                   <div className="mt-1">
@@ -269,7 +270,7 @@ function TriageConsole() {
                   </div>
                 </div>
                 <div>
-                  <p className="font-mono text-[11px] uppercase tracking-wider text-zinc-600">
+                  <p className="font-mono text-[11px] uppercase tracking-wider text-zinc-400">
                     Duplicate of
                   </p>
                   <p className="mt-1 font-mono text-sm">
@@ -277,7 +278,7 @@ function TriageConsole() {
                   </p>
                 </div>
                 <div>
-                  <p className="font-mono text-[11px] uppercase tracking-wider text-zinc-600">
+                  <p className="font-mono text-[11px] uppercase tracking-wider text-zinc-400">
                     Run
                   </p>
                   <p className="mt-1 truncate font-mono text-sm text-zinc-400">
@@ -287,7 +288,7 @@ function TriageConsole() {
               </div>
               <div className="mt-3 border-t border-line pt-3">
                 <div className="mb-1.5 flex items-center justify-between">
-                  <p className="font-mono text-[11px] uppercase tracking-wider text-zinc-600">
+                  <p className="font-mono text-[11px] uppercase tracking-wider text-zinc-400">
                     Draft reply
                   </p>
                   <CopyButton text={out.draft_reply} />
@@ -303,7 +304,7 @@ function TriageConsole() {
                   </PrimaryButton>
                 ) : null}
                 {approved && <Pill tone="ok">approved ✓</Pill>}
-                <span className="text-xs text-zinc-600">
+                <span className="text-xs text-zinc-400">
                   {approved
                     ? "Live post goes via the Cloud flow."
                     : "Nothing self-posts, ever."}
@@ -314,7 +315,7 @@ function TriageConsole() {
           {out && tab === "json" && (
             <div className="reveal overflow-hidden rounded-lg border border-line bg-black">
               <div className="flex items-center justify-between border-b border-line px-3 py-1.5">
-                <span className="font-mono text-[11px] text-zinc-600">
+                <span className="font-mono text-[11px] text-zinc-400">
                   POST /api/run-agent → 200
                 </span>
                 <CopyButton text={rawJson} label="Copy JSON" />
@@ -327,17 +328,21 @@ function TriageConsole() {
         </div>
       </div>
 
-      {/* recent */}
-      <div className="hidden lg:block">
-        <div className="flex h-[52px] items-end">
-          <Eyebrow>Recent</Eyebrow>
+      {/* recent — full-width strip below, horizontal scroll */}
+      </div>
+      <div className="mt-6">
+        <div className="mb-2 flex items-baseline justify-between">
+          <Eyebrow>Recent in this browser</Eyebrow>
+          <span className="font-mono text-[11px] text-zinc-500">
+            {recent.length}/10 · click to reload
+          </span>
         </div>
-        <div className="mt-4 space-y-1.5">
-          {recent.length === 0 && (
-            <p className="text-[13px] text-zinc-600">
-              This browser&apos;s last 10 runs land here.
-            </p>
-          )}
+        {recent.length === 0 && (
+          <p className="rounded-md border border-dashed border-line px-3 py-3 text-[13px] text-zinc-500">
+            Your last 10 runs land here. Click any of them to reload it into the form.
+          </p>
+        )}
+        <div className="flex gap-2 overflow-x-auto pb-1">
           {recent.map((r) => (
             <button
               key={r.run_id}
@@ -346,24 +351,24 @@ function TriageConsole() {
                 setIssueUrl(r.issue_url);
                 urlRef.current?.focus();
               }}
-              className="block w-full rounded-md border border-transparent px-2.5 py-2 text-left transition hover:border-line hover:bg-white/[0.03]"
+              className="w-60 shrink-0 rounded-md border border-line bg-panel px-3 py-2.5 text-left transition hover:border-zinc-500"
               title={r.issue_url}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="truncate font-mono text-xs text-zinc-300">
+                <span className="truncate font-mono text-xs text-zinc-200">
                   {r.repo.split("/")[1] ?? r.repo} · {r.issue_type}
                 </span>
                 <span
-                  className={`font-mono text-[11px] ${
+                  className={`shrink-0 font-mono text-[11px] ${
                     r.severity === "P0" || r.severity === "P1"
                       ? "text-red-300"
-                      : "text-zinc-500"
+                      : "text-zinc-400"
                   }`}
                 >
                   {r.severity}
                 </span>
               </div>
-              <div className="mt-0.5 truncate font-mono text-[11px] text-zinc-600">
+              <div className="mt-1 truncate font-mono text-[11px] text-zinc-500">
                 {r.issue_url.replace("https://github.com/", "")}
               </div>
             </button>
@@ -376,7 +381,7 @@ function TriageConsole() {
 
 export default function ChatPage() {
   return (
-    <Suspense fallback={<div className="pt-8 text-sm text-zinc-600">Loading…</div>}>
+    <Suspense fallback={<div className="pt-8 text-sm text-zinc-400">Loading…</div>}>
       <TriageConsole />
     </Suspense>
   );
