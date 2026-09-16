@@ -35,10 +35,14 @@ const EXAMPLES = [
   ["Deepjyoti-Sarmah/VibeCode", "new?template=syn-clerk-loop", "Clerk loop"],
 ];
 
-function severityTone(s: string): "bad" | "warn" | "neutral" {
-  if (s === "P0" || s === "P1") return "bad";
-  if (s === "P2") return "warn";
-  return "neutral";
+function callsign(repo: string, url: string) {
+  const m = url.match(/github\.com\/([^/]+\/[^/]+)\/(issues|pull)\/([^\/?#]+)/);
+  const short = m ? m[1].split("/")[1] ?? m[1] : repo;
+  const num = m ? m[3].toUpperCase().slice(0, 14) : "???";
+  const prefix = repo.startsWith("activepieces/")
+    ? "AP"
+    : short.slice(0, 2).toUpperCase();
+  return `${prefix} · ${num}`;
 }
 
 function TriageConsole() {
@@ -75,15 +79,15 @@ function TriageConsole() {
   const out = verdict?.output;
 
   return (
-    <div className="grid gap-5 pt-10 lg:grid-cols-[380px_1fr]">
+    <div className="grid gap-6 pt-10 lg:grid-cols-[360px_1fr]">
       {/* console */}
       <div>
-        <Eyebrow>Triage console</Eyebrow>
+        <Eyebrow>Strip bay · file an issue</Eyebrow>
         <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
-          Run a verdict
+          Print a strip
         </h1>
         <Card className="mt-5 space-y-4 p-5">
-          <Field label="Repository">
+          <Field label="Sector / repository">
             <select
               value={repo}
               onChange={(e) => setRepo(e.target.value)}
@@ -96,7 +100,7 @@ function TriageConsole() {
               ))}
             </select>
           </Field>
-          <Field label="Issue URL">
+          <Field label="Issue URL (callsign)">
             <input
               value={issueUrl}
               onChange={(e) => setIssueUrl(e.target.value)}
@@ -109,15 +113,15 @@ function TriageConsole() {
             {loading ? (
               <>
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#0c1005]/30 border-t-[#0c1005]" />
-                Agent reasoning…
+                Tower reasoning…
               </>
             ) : (
-              "Run triage →"
+              "File the strip →"
             )}
           </PrimaryButton>
           <div>
             <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-slate-500">
-              Try one
+              On scope now
             </p>
             <div className="flex flex-wrap gap-2">
               {EXAMPLES.map(([r, n, label]) => (
@@ -138,10 +142,10 @@ function TriageConsole() {
       </div>
 
       {/* verdict */}
-      <div className="pt-0 lg:pt-[76px]">
+      <div className="lg:pt-[76px]">
         {verdict?.mode === "mock" && (
           <div className="mb-3 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-2.5 text-sm text-amber-300">
-            MOCK mode — deterministic demo output in the exact live shape.
+            MOCK feed — deterministic demo strips in the exact live shape.
           </div>
         )}
         {verdict?.error && !out && (
@@ -151,102 +155,106 @@ function TriageConsole() {
           </Card>
         )}
         {!verdict && (
-          <Card className="flex min-h-[320px] flex-col items-center justify-center p-8 text-center">
-            <div className="font-display text-6xl text-slate-700">?</div>
-            <p className="mt-3 max-w-xs text-slate-500">
-              Your verdict report lands here — type, severity, labels, duplicate
-              check and a draft reply.
+          <div className="rounded-2xl border border-dashed border-line p-8 text-center">
+            <div className="strip-paper mx-auto flex max-w-sm -rotate-1 items-stretch rounded-sm opacity-60">
+              <div className="strip-holes w-3 shrink-0" aria-hidden />
+              <div className="flex-1 px-4 py-6 text-center font-mono text-xs text-black/50">
+                EMPTY HOLDER — FILE A STRIP TO BEGIN
+              </div>
+              <div className="strip-holes w-3 shrink-0" aria-hidden />
+            </div>
+            <p className="mx-auto mt-4 max-w-xs text-sm text-slate-500">
+              The verdict strip prints here — callsign, stamp, confidence and a
+              draft reply.
             </p>
-          </Card>
+          </div>
         )}
         {out && (
-          <Card className="reveal overflow-hidden p-0">
-            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line bg-raised/60 p-5">
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500">
-                  Triage report
-                </p>
-                <p className="mt-1 font-mono text-[13px] text-slate-300">
-                  {verdict?.run_id}
-                </p>
-              </div>
-              <span
-                className={`stamp text-lg ${
-                  out.severity === "P0" || out.severity === "P1"
-                    ? "text-red-300"
-                    : out.severity === "P2"
-                      ? "text-amber-300"
-                      : "text-slate-300"
-                }`}
-              >
-                {out.severity}
-              </span>
-            </div>
-            <div className="space-y-4 p-5">
-              <div className="flex flex-wrap items-center gap-2">
-                <Pill tone="lime">{out.issue_type}</Pill>
-                {out.labels.map((l) => (
-                  <Pill key={l}>{l}</Pill>
-                ))}
-                {out.needs_human ? (
-                  <Pill tone="warn">needs human</Pill>
-                ) : (
-                  <Pill tone="ok">auto-ok</Pill>
-                )}
-              </div>
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-500">
-                    Confidence
-                  </p>
-                  <div className="mt-1.5">
-                    <Meter value={out.confidence} />
+          <div className="reveal">
+            {/* printed strip */}
+            <div className="strip-paper flex items-stretch overflow-hidden rounded-md shadow-[0_24px_70px_-24px_rgb(0_0_0/0.9)]">
+              <div className="strip-holes w-3.5 shrink-0 opacity-80" aria-hidden />
+              <div className="min-w-0 flex-1 px-5 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-black/50">
+                      Triage strip · {verdict?.run_id}
+                    </p>
+                    <p className="mt-0.5 font-mono text-xl font-bold tracking-tight">
+                      {callsign(repo, issueUrl)}
+                    </p>
+                  </div>
+                  <span
+                    className={`stamp text-xl ${
+                      out.severity === "P0" || out.severity === "P1"
+                        ? "text-red-800"
+                        : out.severity === "P2"
+                          ? "text-amber-700"
+                          : "text-black/70"
+                    }`}
+                  >
+                    {out.severity} {out.issue_type.toUpperCase()}
+                  </span>
+                </div>
+                <div className="tear-x my-3" />
+                <div className="grid grid-cols-3 gap-3 font-mono text-xs">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-black/50">
+                      Confidence
+                    </p>
+                    <p className="mt-1 text-sm font-bold">
+                      {Math.round(out.confidence * 100)}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-black/50">
+                      Duplicate
+                    </p>
+                    <p className="mt-1 text-sm font-bold">
+                      {out.duplicate_of !== null ? `#${out.duplicate_of}` : "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-black/50">
+                      Gate
+                    </p>
+                    <p className="mt-1 text-sm font-bold">
+                      {out.needs_human ? "HOLD" : "CLEAR"}
+                    </p>
                   </div>
                 </div>
-                <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-500">
-                    Duplicate of
-                  </p>
-                  <p className="mt-1.5 font-mono text-sm text-slate-200">
-                    {out.duplicate_of !== null ? `#${out.duplicate_of}` : "— none —"}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-500">
-                    Gate
-                  </p>
-                  <p className="mt-1.5 font-mono text-sm text-slate-200">
-                    {out.needs_human ? "approval required" : "auto-postable"}
-                  </p>
-                </div>
-              </div>
-              <div className="rounded-xl border-l-2 border-lime bg-lime/[0.04] p-4">
-                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-500">
-                  Draft reply
+                <div className="tear-x my-3" />
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-black/50">
+                  Labels · {out.labels.join(" · ") || "—"}
                 </p>
-                <p className="mt-1.5 leading-relaxed text-slate-200">
+                <p className="mt-2 border-l-[3px] border-black/70 pl-3 text-[15px] leading-relaxed">
                   {out.draft_reply}
                 </p>
               </div>
+              <div className="strip-holes w-3.5 shrink-0 opacity-80" aria-hidden />
+            </div>
+
+            {/* controller actions */}
+            <div className="mt-4 flex flex-wrap items-center gap-3">
               {out.needs_human && !approved ? (
                 <PrimaryButton onClick={() => setApproved(true)}>
-                  Approve reply ✓
+                  Stamp approved ✓
                 </PrimaryButton>
               ) : null}
               {approved && (
-                <p className="text-sm text-slate-400">
-                  Approved in demo. Live approval posts through the Cloud flow —
-                  nothing self-posts, ever.
-                </p>
+                <Pill tone="ok">approved — live post goes via Cloud flow</Pill>
               )}
               {!out.needs_human && (
-                <p className="text-sm text-slate-500">
-                  High-confidence verdict. In production this still logs to{" "}
+                <span className="text-sm text-slate-500">
+                  High-confidence strip. Still logged to{" "}
                   <code className="font-mono text-[13px]">runs</code> for audit.
-                </p>
+                </span>
               )}
+              <span className="font-mono text-xs text-slate-600">
+                <Meter value={out.confidence} />
+              </span>
             </div>
-          </Card>
+          </div>
         )}
       </div>
     </div>
@@ -255,7 +263,7 @@ function TriageConsole() {
 
 export default function ChatPage() {
   return (
-    <Suspense fallback={<div className="pt-10 text-slate-500">Loading console…</div>}>
+    <Suspense fallback={<div className="pt-10 text-slate-500">Loading bay…</div>}>
       <TriageConsole />
     </Suspense>
   );

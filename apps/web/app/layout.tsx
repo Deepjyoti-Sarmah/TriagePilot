@@ -4,6 +4,7 @@ import {
   Instrument_Sans,
   JetBrains_Mono,
 } from "next/font/google";
+import { Clock } from "@/components/clock";
 import "./globals.css";
 
 const display = Bricolage_Grotesque({
@@ -64,10 +65,11 @@ export default function RootLayout({
               </span>
             </a>
             <nav className="flex items-center gap-1 text-sm">
+              <Clock />
               {[
-                ["Triage", "/chat"],
-                ["Runs", "/runs"],
-                ["Add repo", "/repos/new"],
+                ["Strip bay", "/chat"],
+                ["Log", "/runs"],
+                ["New sector", "/repos/new"],
               ].map(([label, href]) => (
                 <a
                   key={href}
@@ -90,8 +92,8 @@ export default function RootLayout({
         <main className="relative mx-auto max-w-6xl px-5 pb-20">{children}</main>
         <footer className="relative border-t border-line/70">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-5 py-5 font-mono text-xs text-slate-600">
-            <span>TriagePilot — spec-driven demo · human approves every post</span>
-            <span>specs/001 · 80 eval rows · mock mode until keys land</span>
+            <span>TriagePilot tower — every strip lands, nothing posts itself</span>
+            <span>bay 04 sectors · 80 eval strips · mock feed until keys land</span>
           </div>
         </footer>
       </body>

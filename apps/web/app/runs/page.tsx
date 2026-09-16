@@ -1,5 +1,5 @@
 import { mockRuns } from "@/lib/mock";
-import { Eyebrow, Card, Pill } from "@/components/ui";
+import { Eyebrow, Pill } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -43,27 +43,26 @@ function approvalRate(runs: Run[]) {
 
 export default async function RunsPage() {
   const { runs, live } = await loadRuns();
-  const maxLatency = Math.max(...runs.map((r) => r.latency_ms), 1);
   const stats: Array<[string, string, string]> = [
-    ["Total runs", String(runs.length), "this demo window"],
+    ["Strips filed", String(runs.length), "this demo window"],
     ["Avg confidence", avgConf(runs), "gate at 0.70"],
-    ["Avg latency", avgLatency(runs), "p95 target 60s"],
-    ["Approval rate", approvalRate(runs), "human in the loop"],
+    ["Avg handle time", avgLatency(runs), "p95 target 60s"],
+    ["Stamped", approvalRate(runs), "human in the loop"],
   ];
 
   return (
     <div className="pt-10">
-      <Eyebrow>Run history · audit trail</Eyebrow>
+      <Eyebrow>Filed strips · audit log</Eyebrow>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
         <h1 className="font-display text-4xl font-bold tracking-tight">
-          Runs
+          The log
         </h1>
-        {!live && <Pill tone="warn">mock data</Pill>}
+        {!live && <Pill tone="warn">mock feed</Pill>}
       </div>
 
       {!live && (
         <div className="mt-4 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-2.5 text-sm text-amber-300">
-          missing_config — showing mock runs. Connect{" "}
+          missing_config — showing filed demo strips. Connect{" "}
           <code className="font-mono">AP_API_KEY</code> to read the live Tables{" "}
           <code className="font-mono">runs</code>.
         </div>
@@ -81,73 +80,51 @@ export default async function RunsPage() {
         ))}
       </div>
 
-      <Card className="mt-5 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm">
-            <thead>
-              <tr className="border-b border-line text-left font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500">
-                <th className="px-5 py-3">run</th>
-                <th className="px-3 py-3">repo</th>
-                <th className="px-3 py-3">verdict</th>
-                <th className="px-3 py-3">conf</th>
-                <th className="px-3 py-3">latency</th>
-                <th className="px-5 py-3">approved</th>
-              </tr>
-            </thead>
-            <tbody>
-              {runs.map((r) => (
-                <tr
-                  key={r.run_id}
-                  className="border-b border-line/60 transition-colors last:border-0 hover:bg-white/[0.02]"
+      {/* strip bay */}
+      <div className="mt-6 space-y-3">
+        {runs.map((r, i) => (
+          <div
+            key={r.run_id}
+            className={`strip-paper flex items-stretch overflow-hidden rounded-md shadow-[0_16px_44px_-20px_rgb(0_0_0/0.85)] ${
+              i % 2 === 0 ? "-rotate-[0.25deg]" : "rotate-[0.25deg]"
+            }`}
+          >
+            <div className="strip-holes w-3 shrink-0 opacity-80" aria-hidden />
+            <div className="grid min-w-0 flex-1 grid-cols-[1fr_auto] items-center gap-x-5 gap-y-1 px-4 py-3 sm:grid-cols-[130px_1fr_auto_auto_auto]">
+              <span className="font-mono text-[13px] font-bold text-lime-950">
+                {r.run_id}
+              </span>
+              <span className="col-span-2 truncate font-mono text-[13px] sm:col-span-1">
+                {r.repo}
+              </span>
+              <span className="font-mono text-[13px] font-bold uppercase">
+                {r.issue_type}
+                <span
+                  className={`ml-2 ${
+                    r.severity === "P0" || r.severity === "P1"
+                      ? "text-red-800"
+                      : "text-black/60"
+                  }`}
                 >
-                  <td className="px-5 py-3 font-mono text-[13px] text-lime">
-                    {r.run_id}
-                  </td>
-                  <td className="max-w-[220px] truncate px-3 py-3 font-mono text-[13px] text-slate-300">
-                    {r.repo}
-                  </td>
-                  <td className="px-3 py-3">
-                    <span className="mr-2">{r.issue_type}</span>
-                    <Pill
-                      tone={
-                        r.severity === "P0" || r.severity === "P1"
-                          ? "bad"
-                          : "neutral"
-                      }
-                    >
-                      {r.severity}
-                    </Pill>
-                  </td>
-                  <td className="px-3 py-3 font-mono text-[13px]">
-                    {r.confidence.toFixed(2)}
-                  </td>
-                  <td className="px-3 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-20 overflow-hidden rounded-full bg-white/10">
-                        <div
-                          className="h-full rounded-full bg-lime/80"
-                          style={{
-                            width: `${(r.latency_ms / maxLatency) * 100}%`,
-                          }}
-                        />
-                      </div>
-                      <span className="font-mono text-xs text-slate-400">
-                        {(r.latency_ms / 1000).toFixed(1)}s
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3 font-mono text-[13px] text-slate-400">
-                    {r.approved_by ?? "—"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+                  {r.severity}
+                </span>
+              </span>
+              <span className="font-mono text-xs text-black/60 tabular-nums">
+                {(r.confidence * 100).toFixed(0)}% ·{" "}
+                {(r.latency_ms / 1000).toFixed(1)}s
+              </span>
+              <span className="font-mono text-xs font-bold text-black/70">
+                {r.approved_by ? `✓ ${r.approved_by}` : "○ HOLD"}
+              </span>
+            </div>
+            <div className="strip-holes w-3 shrink-0 opacity-80" aria-hidden />
+          </div>
+        ))}
+      </div>
       <p className="mt-4 text-sm text-slate-500">
-        Earnings sim (Gravity narrative): runs × 21.27% share tracked in Tables{" "}
-        <code className="font-mono text-[13px]">earnings_sim</code> once live.
+        Earnings sim (Gravity narrative): strips × 21.27% share tracked in
+        Tables <code className="font-mono text-[13px]">earnings_sim</code> once
+        live.
       </p>
     </div>
   );
