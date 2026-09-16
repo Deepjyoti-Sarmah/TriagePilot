@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Eyebrow, Card, Field, inputCls } from "@/components/ui";
+import { Eyebrow, Card, Field, inputCls, CopyButton } from "@/components/ui";
 
 export default function NewRepoPage() {
   const [id, setId] = useState("owner/repo");
   const [channel, setChannel] = useState("#maintainers");
   const [tone, setTone] = useState("concise maintainer, link docs");
   const [labels, setLabels] = useState("bug, feature, docs, question, duplicate");
-  const [copied, setCopied] = useState(false);
 
   const slug = (id.split("/")[1] ?? "repo")
     .toLowerCase()
@@ -25,34 +24,26 @@ export default function NewRepoPage() {
   p0_definition: outage or data-loss bug
   docs: []`;
 
-  async function copy() {
-    await navigator.clipboard.writeText(yaml);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1600);
-  }
-
   return (
-    <div className="pt-10">
+    <div className="pt-8">
       <Eyebrow>Onboard in minutes · no code change</Eyebrow>
-      <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
-        Add a repo
-      </h1>
-      <p className="mt-2 max-w-2xl text-[15px] text-slate-400">
-        Generates a <code className="font-mono text-[13px] text-slate-200">repos.yaml</code>
+      <h1 className="mt-2 text-2xl font-semibold tracking-tight">Add a repo</h1>
+      <p className="mt-2 max-w-2xl text-sm text-zinc-400">
+        Generates a <code className="font-mono text-[13px] text-zinc-200">repos.yaml</code>
         -compatible draft. Paste it into{" "}
-        <code className="font-mono text-[13px] text-slate-200">
+        <code className="font-mono text-[13px] text-zinc-200">
           specs/002-multi-repo/contracts/repos.yaml
         </code>
-        , upload one knowledge base, add 20 eval rows — done.
+        , upload one knowledge base, add 20 eval rows.
       </p>
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-2">
-        <Card className="space-y-4 p-5">
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <Card className="space-y-4 p-4">
           <Field label="owner / repo">
             <input
               value={id}
               onChange={(e) => setId(e.target.value)}
-              className={`${inputCls} font-mono text-sm`}
+              className={`${inputCls} font-mono text-[13px]`}
               spellCheck={false}
             />
           </Field>
@@ -60,7 +51,7 @@ export default function NewRepoPage() {
             <input
               value={channel}
               onChange={(e) => setChannel(e.target.value)}
-              className={`${inputCls} font-mono text-sm`}
+              className={`${inputCls} font-mono text-[13px]`}
               spellCheck={false}
             />
           </Field>
@@ -71,11 +62,11 @@ export default function NewRepoPage() {
               className={inputCls}
             />
           </Field>
-          <Field label="Labels (comma separated)">
+          <Field label="Labels">
             <input
               value={labels}
               onChange={(e) => setLabels(e.target.value)}
-              className={`${inputCls} font-mono text-sm`}
+              className={`${inputCls} font-mono text-[13px]`}
               spellCheck={false}
             />
           </Field>
@@ -83,7 +74,7 @@ export default function NewRepoPage() {
             {["01 · YAML", "02 · KB upload", "03 · 20 evals"].map((s) => (
               <div
                 key={s}
-                className="rounded-lg border border-line bg-ink px-3 py-2 text-center font-mono text-xs text-slate-400"
+                className="rounded-md border border-line bg-ink px-2 py-2 text-center font-mono text-[11px] text-zinc-500"
               >
                 {s}
               </div>
@@ -91,19 +82,16 @@ export default function NewRepoPage() {
           </div>
         </Card>
 
-        <Card className="flex flex-col p-5">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-500">
-            Live preview
-          </p>
-          <pre className="mt-2 flex-1 overflow-x-auto rounded-xl border border-line bg-ink p-4 font-mono text-[13px] leading-relaxed text-lime/90">
+        <Card className="flex flex-col p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-zinc-600">
+              Live preview
+            </p>
+            <CopyButton text={yaml} label="Copy YAML" />
+          </div>
+          <pre className="flex-1 overflow-x-auto rounded-md border border-line bg-black p-3.5 font-mono text-[13px] leading-relaxed text-zinc-200">
             {yaml}
           </pre>
-          <button
-            onClick={copy}
-            className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-lime px-5 py-2.5 font-display text-[15px] font-semibold text-[#0c1005] transition hover:brightness-110 active:scale-[0.98]"
-          >
-            {copied ? "Copied ✓" : "Copy YAML"}
-          </button>
         </Card>
       </div>
     </div>
