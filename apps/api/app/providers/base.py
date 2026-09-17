@@ -1,4 +1,5 @@
 """Provider interface. Mirrors apps/web/lib/providers/types.ts."""
+
 import time
 from dataclasses import dataclass
 from typing import Protocol
@@ -25,11 +26,12 @@ class TriageProvider(Protocol):
     name: str
     model: str
 
-    def triage(self, inp: TriageInput) -> ProviderResult:
-        ...
+    def triage(self, inp: TriageInput) -> ProviderResult: ...
 
 
-def timed(provider_name: str, model: str, mode: str, t0: float, output: TriageOutput) -> ProviderResult:
+def timed(
+    provider_name: str, model: str, mode: str, t0: float, output: TriageOutput
+) -> ProviderResult:
     return ProviderResult(
         output=output,
         provider=provider_name,

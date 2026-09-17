@@ -4,9 +4,12 @@ Run: uvicorn app.main:app --port 8000  (from apps/api/)
 import time
 from typing import Optional
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
+
+load_dotenv()  # apps/api/.env (git-ignored) for local runs
 
 from .contracts import RunMeta, RunRequest, RunResponse
 from .providers.activepieces import ProviderError

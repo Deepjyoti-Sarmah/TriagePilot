@@ -1,5 +1,6 @@
 .env.local
 .env*.local
+apps/api/.env
 apps/web/.next/
 apps/web/node_modules/
 __pycache__/
