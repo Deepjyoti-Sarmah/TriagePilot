@@ -39,5 +39,6 @@ Demo path: `DEMO.md`.
 - `flows/` — Cloud exports (placeholders until D4)
 - `tables/schema.sql` — Tables DDL source of truth
 - `knowledge/SOURCES.md` — KB upload tracker
-- `apps/web` — Next.js (scaffolded D5)
+- `apps/web` — Next.js console (thin proxy to Python when `TRIAGE_API_URL` set, local mock otherwise)
+- `apps/api` — FastAPI backend: provider registry, contracts, `/health` + `/api/run-agent`
 - `.env.example` — keys you will provide later (never commit real values)

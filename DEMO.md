@@ -43,7 +43,16 @@ against the live GitHub API, rest marked `synthetic-edge`.
 ## 6. One-command proof (60s)
 
 ```bash
-bash scripts/smoke.sh 3210   # build + boot + 8 asserts, exit 0
+bash scripts/smoke.sh 3210   # web build + boot + 10 asserts, then FastAPI :8000 + 4 asserts
+```
+
+Split-stack manual run:
+
+```bash
+# terminal 1 — python backend
+cd apps/api && uvicorn app.main:app --port 8000
+# terminal 2 — web against it
+cd apps/web && TRIAGE_API_URL=http://localhost:8000 npm run dev
 ```
 
 Total: under 5 minutes. Live Cloud/Vercel wiring is tracked in

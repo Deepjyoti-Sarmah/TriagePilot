@@ -67,3 +67,17 @@ specs:
       - apps/web/lib/providers/index.ts
       - apps/web/app/api/run-agent/route.ts
     notes: "strict 18/18 green 2026-09-19: registry live, bogus→400, nokey→501, smoke 10/10"
+  008-python-backend:
+    status: verified
+    files:
+      - specs/008-python-backend/spec.md
+      - specs/008-python-backend/tasks.md
+      - apps/api/requirements.txt
+      - apps/api/app/main.py
+      - apps/api/app/contracts.py
+      - apps/api/app/providers/base.py
+      - apps/api/app/providers/mock.py
+      - apps/api/app/providers/activepieces.py
+      - apps/api/app/providers/direct.py
+      - apps/api/app/providers/registry.py
+    notes: "strict 23/23 green 2026-09-19: dual smoke 14/14, parity 8/8, files ≤200"

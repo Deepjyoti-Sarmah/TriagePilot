@@ -45,6 +45,7 @@ MCP Server ON (Discovery + Tables read-only first)
 | 005 evals + guardrails | `specs/005-evals-guardrails/` | precision >0.8, conf gate, idempotency |
 | 006 keyless hardening | `specs/006-keyless-hardening/` | smoke, sync gates, CI, demo without keys |
 | 007 provider backend | `specs/007-provider-backend/` | env-selected providers, meta on every run |
+| 008 python backend | `specs/008-python-backend/` | FastAPI split, contract parity, dual smoke |
 | system | `specs/_system/` | how to write a spec + Definition of Done |
 
 Each spec folder has: `spec.md` (what/why) + `tasks.md` (checkboxes) + `contracts/` or `evals/` as needed.
