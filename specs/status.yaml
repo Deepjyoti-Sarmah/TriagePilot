@@ -80,4 +80,4 @@ specs:
       - apps/api/app/providers/activepieces.py
       - apps/api/app/providers/direct.py
       - apps/api/app/providers/registry.py
-    notes: "strict 23/23 green 2026-09-19: dual smoke 14/14, parity 8/8, files ≤200"
+    notes: "strict 23/23 green 2026-09-19: dual smoke 14/14, parity 8/8, files ≤200, proxy path proven live (web→py bug/P1)"
