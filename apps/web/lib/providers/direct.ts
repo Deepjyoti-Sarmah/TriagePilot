@@ -72,6 +72,32 @@ function holdForHuman(repo: string, reason: string) {
   };
 }
 
+/** Public title+body so the model classifies content, not the URL.
+ *  Never fails the run — returns a note when unavailable. */
+async function githubIssueText(issueUrl: string): Promise<string> {
+  const m = issueUrl.match(/github\.com\/([^/]+\/[^/]+)\/(?:issues|pull)\/(\d+)/);
+  if (!m) return "(could not parse issue reference from URL)";
+  const headers: Record<string, string> = {
+    Accept: "application/vnd.github+json",
+  };
+  if (process.env.GITHUB_PAT) {
+    headers.Authorization = `Bearer ${process.env.GITHUB_PAT}`;
+  }
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${m[1]}/issues/${m[2]}`,
+      { headers }
+    );
+    if (!res.ok) return `(GitHub API returned ${res.status} for this issue)`;
+    const data = await res.json().catch(() => null);
+    const title = String(data?.title ?? "").trim();
+    const body = String(data?.body ?? "").trim().slice(0, 3000);
+    return `Title: ${title}\nBody: ${body || "(empty)"}`;
+  } catch {
+    return "(issue context unavailable)";
+  }
+}
+
 function makeDirect(name: DirectName): TriageProvider {
   const preset = PRESETS[name];
   return {
@@ -103,7 +129,12 @@ function makeDirect(name: DirectName): TriageProvider {
           model: provider.model,
           messages: [
             { role: "system", content: loadPrompt(input.repo) },
-            { role: "user", content: `Repo: ${input.repo}\nIssue: ${input.issue_url}` },
+            {
+              role: "user",
+              content:
+                `Repo: ${input.repo}\nURL: ${input.issue_url}\n` +
+                (await githubIssueText(input.issue_url)),
+            },
           ],
           temperature: 0.2,
           response_format: { type: "json_object" },
@@ -124,7 +155,12 @@ function makeDirect(name: DirectName): TriageProvider {
         parsedJson = null;
       }
       // Classify-only contract: force human review below the direct gate (0.8).
-      const checked = TriageOutput.safeParse(parsedJson);
+      // repo is routing context, never model output: inject server-side.
+      const withRepo =
+        parsedJson && typeof parsedJson === "object"
+          ? { ...parsedJson, repo: input.repo }
+          : parsedJson;
+      const checked = TriageOutput.safeParse(withRepo);
       const output = checked.success
         ? {
             ...checked.data,

@@ -23,6 +23,12 @@ Triage any GitHub issue with a ReAct agent (OpenRouter free model + per-repo KB)
   of the ~25 `:free` models (provider-agnostic by design), (3) $5 credit
   unlocks paid routing + far higher limits. Direct path hardened anyway:
   lenient JSON extraction (reasoning traces) + hold-for-human fallback.
+- Live proof 2026-09-19: `deepseek/deepseek-v4-flash-0731:free` triaged
+  real issue #15626 → **bug/P1/conf 0.95**, sensible labels + draft,
+  34s, artifact `evals/sample-run-direct-001.json`. Two real bugs found
+  en route: (a) direct path sent URL-only context — now fetches public
+  title+body via GitHub API; (b) model omits `repo` (routing context) —
+  now injected server-side post-validation, both stacks.
 - Fallback: `gpt-4o` via OpenAI provider if the gate fails twice.
   KB embeddings need an embedding-compatible provider (OpenAI/Google/
   Azure/OpenRouter); confirm OpenRouter embeddings or keep one OpenAI

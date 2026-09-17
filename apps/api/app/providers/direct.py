@@ -69,6 +69,36 @@ def _extract_json(text: str):
     return None
 
 
+def _github_issue_text(repo: str, issue_url: str) -> str:
+    """Fetch public title+body so the model classifies content, not URLs.
+    Unauthenticated: 60 req/hr. GITHUB_PAT (optional): 5000/hr.
+    Never fails the run — returns a note when unavailable.
+    """
+    import re as _re
+
+    m = _re.search(r"github\.com/([^/]+/[^/]+)/(?:issues|pull)/(\d+)", issue_url)
+    if not m:
+        return "(could not parse issue reference from URL)"
+    owner_repo, num = m.group(1), m.group(2)
+    headers = {"Accept": "application/vnd.github+json"}
+    token = os.environ.get("GITHUB_PAT", "")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    try:
+        res = httpx.get(
+            f"https://api.github.com/repos/{owner_repo}/issues/{num}",
+            headers=headers, timeout=20,
+        )
+        if res.status_code >= 400:
+            return f"(GitHub API returned {res.status_code} for this issue)"
+        data = res.json()
+        title = (data.get("title") or "").strip()
+        body = (data.get("body") or "").strip()[:3000]
+        return f"Title: {title}\nBody: {body or '(empty)'}"
+    except Exception as e:
+        return f"(issue context unavailable: {type(e).__name__})"
+
+
 def _hold(repo: str, reason: str) -> TriageOutput:
     return TriageOutput(
         repo=repo, issue_type="question", severity="P3", confidence=0.4,
@@ -100,7 +130,8 @@ def make_direct(name: str):
                            "messages": [
                                {"role": "system", "content": load_prompt(inp.repo)},
                                {"role": "user",
-                                "content": f"Repo: {inp.repo}\nIssue: {inp.issue_url}"},
+                                "content": f"Repo: {inp.repo}\nURL: {inp.issue_url}\n"
+                                           f"{_github_issue_text(inp.repo, inp.issue_url)}"},
                            ],
                            "temperature": 0.2,
                            "response_format": {"type": "json_object"}},
@@ -113,6 +144,9 @@ def make_direct(name: str):
             try:
                 text = (res.json()["choices"][0]["message"]["content"] or "")
                 parsed = _extract_json(text)
+                # repo is routing context, never model output: inject server-side.
+                if isinstance(parsed, dict):
+                    parsed["repo"] = inp.repo
                 output = TriageOutput.model_validate(parsed)
             except Exception:
                 return timed(name, model, "live-classify", t0,
