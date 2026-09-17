@@ -51,6 +51,24 @@ def load_prompt(repo: str) -> str:
     return FALLBACK_PROMPT.replace("{{repo}}", repo)
 
 
+def _extract_json(text: str):
+    """Parse model output leniently: raw JSON, else the largest {...} block.
+    Reasoning models often wrap JSON in thinking traces — extract, don't reject.
+    """
+    import re as _re
+
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+    for m in _re.finditer(r"\{.*\}", text, _re.DOTALL):
+        try:
+            return json.loads(m.group(0))
+        except Exception:
+            continue
+    return None
+
+
 def _hold(repo: str, reason: str) -> TriageOutput:
     return TriageOutput(
         repo=repo, issue_type="question", severity="P3", confidence=0.4,
@@ -94,7 +112,7 @@ def make_direct(name: str):
                 raise ProviderError(f"Direct {name} call failed with {res.status_code}.")
             try:
                 text = (res.json()["choices"][0]["message"]["content"] or "")
-                parsed = json.loads(text)
+                parsed = _extract_json(text)
                 output = TriageOutput.model_validate(parsed)
             except Exception:
                 return timed(name, model, "live-classify", t0,

@@ -16,6 +16,13 @@ Triage any GitHub issue with a ReAct agent (OpenRouter free model + per-repo KB)
   the 80-row eval sweep in small batches; tool-calling is weaker than
   `gpt-4o`, so the **type-accuracy > 0.8 gate stays** and every run logs
   `provider/model` — a miss is a finding, not a surprise.
+- Live finding 2026-09-19: free shared pools throttle hard at times
+  (`qwen3.8-27b:free` AND `gemma-4-31b-it:free` both 429
+  `upstream_provider_shared_pool`, key itself valid $0/$5). Mitigations,
+  in order: (1) retry later in small batches, (2) `TRIAGE_MODEL` to any
+  of the ~25 `:free` models (provider-agnostic by design), (3) $5 credit
+  unlocks paid routing + far higher limits. Direct path hardened anyway:
+  lenient JSON extraction (reasoning traces) + hold-for-human fallback.
 - Fallback: `gpt-4o` via OpenAI provider if the gate fails twice.
   KB embeddings need an embedding-compatible provider (OpenAI/Google/
   Azure/OpenRouter); confirm OpenRouter embeddings or keep one OpenAI

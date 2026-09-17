@@ -40,6 +40,25 @@ const PRESETS: Record<DirectName, { baseUrl: string; keyEnv: string; defaultMode
   },
 };
 
+/** Parse leniently: raw JSON, else the largest {...} block.
+ *  Reasoning models wrap JSON in thinking traces — extract, don't reject. */
+function extractJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    /* fall through to extraction */
+  }
+  const matches = text.match(/\{[\s\S]*\}/g) ?? [];
+  for (const m of matches) {
+    try {
+      return JSON.parse(m);
+    } catch {
+      /* try next candidate */
+    }
+  }
+  return null;
+}
+
 function holdForHuman(repo: string, reason: string) {
   return {
     repo,
@@ -100,7 +119,7 @@ function makeDirect(name: DirectName): TriageProvider {
       const text: string = data?.choices?.[0]?.message?.content ?? "";
       let parsedJson: unknown = null;
       try {
-        parsedJson = JSON.parse(text);
+        parsedJson = extractJson(text);
       } catch {
         parsedJson = null;
       }
