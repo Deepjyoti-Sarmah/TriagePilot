@@ -39,6 +39,29 @@ export async function POST(req: NextRequest) {
   }
   const { repo, issue_url } = parsed.data;
 
+  // Split backend (spec 008): forward to Python when configured,
+  // otherwise serve the local TS registry (Vercel solo-deploy safe).
+  const apiBase = (process.env.TRIAGE_API_URL || "").replace(/\/$/, "");
+  if (apiBase) {
+    try {
+      const upstream = await fetch(`${apiBase}/api/run-agent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ repo, issue_url }),
+      });
+      const data = await upstream.json().catch(() => ({
+        error: "provider_error",
+        message: "Backend returned non-JSON.",
+      }));
+      return NextResponse.json(data, { status: upstream.status });
+    } catch {
+      return NextResponse.json(
+        { error: "provider_error", message: "Backend unreachable." },
+        { status: 502 }
+      );
+    }
+  }
+
   if (!isKnownRepo(repo)) {
     return NextResponse.json(
       {
