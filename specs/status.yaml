@@ -9,7 +9,7 @@ specs:
       - specs/001-maintainer-agent/tools.matrix.md
       - specs/001-maintainer-agent/tasks.md
       - specs/001-maintainer-agent/contracts/output.schema.json
-    notes: ""
+    notes: "live agent path proven via Cloud flow 2026-09-19: #15626 -> bug/P1/conf 0.95 with tools [github.get_issue, openrouter.chat]; artifact evals/sample-run-001.json. Cloud Agent ENTITY still UI-only: public /v1/agents -> 402 FEATURE_DISABLED."
   002-multi-repo:
     status: in_progress
     files:
@@ -20,14 +20,14 @@ specs:
       - knowledge/SOURCES.md
     notes: ""
   003-flows:
-    status: pending
+    status: in_progress
     files:
       - specs/003-flows/spec.md
       - specs/003-flows/tasks.md
       - flows/webhook-github-intake.json
       - flows/daily-digest.json
       - flows/mcp-maintainer-entry.json
-    notes: "exports land here after Cloud build; placeholders fail verify until real exports"
+    notes: "live 2026-09-19: mcp-maintainer-entry + webhook-github-intake + daily-digest built/published via public API (scripts/cloud/build_flows.py), real exports committed, live /sync verifies bug/P1 on #15626 and #15616; see live-verification.json. Blocked: digest Slack post + MCP trigger (403 API)."
   004-web-ui:
     status: in_progress
     files:
@@ -35,7 +35,7 @@ specs:
       - specs/004-web-ui/tasks.md
       - apps/web/package.json
       - .env.example
-    notes: "vercel_url: (pending deploy); mock verified keyless: build green, /chat + /runs 200, unknown_repo 400, 429 past 10/min"
+    notes: "vercel_url: (pending deploy); mock verified keyless: build green, /chat + /runs 200, unknown_repo 400, 429 past 10/min. Live TS path wired to AP_FLOW_WEBHOOK_URL (default provider activepieces when set)."
   005-evals-guardrails:
     status: in_progress
     files:
@@ -43,7 +43,7 @@ specs:
       - specs/005-evals-guardrails/tasks.md
       - specs/001-maintainer-agent/evals/dataset.jsonl
       - specs/005-evals-guardrails/thresholds.yaml
-    notes: "dataset 80/80 (20 per repo), eval_report.py green; live guardrail proofs + cost column pending API keys"
+    notes: "dataset 80/80 (20 per repo); live sweeps: direct 0.800, activepieces Cloud flow 0.909 (10/11, sweep-003.json); low-conf guardrail proof committed. Pending: Cloud runs-table fields (UI), idempotency proof."
   006-keyless-hardening:
     status: verified
     files:

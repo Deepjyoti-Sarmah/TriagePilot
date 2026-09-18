@@ -1,7 +1,7 @@
 # PLAN — Multi-Repo Maintainer Agent (Activepieces AI Agent)
 
 > Flagship: `activepieces/activepieces` triage. Agent-first, not flow-first.
-> Stack: Activepieces Cloud (Agent + Flows + Tables + KB + MCP) + Vercel Next.js + OpenRouter `qwen/qwen3.8-27b:free` ($0).
+> Stack: Activepieces Cloud (Agent + Flows + Tables + KB + MCP) + Vercel Next.js + OpenRouter `deepseek/deepseek-v4-flash-0731:free` ($0).
 > Method: spec-driven. Every build step maps to a file in `specs/`. Nothing is "done" until `scripts/verify.py` says so.
 
 ## 1. What we are building (simple)
@@ -28,7 +28,7 @@ Flow draws steps once. Agent figures out steps each run (ReAct loop, `maxSteps: 
 ```
 Vercel /chat {repo, issue_url} → POST /api/run-agent
   → Cloud flow `mcp-maintainer-entry` [MCP Trigger, returnsResponse:true]
-    → Agent Step [openrouter/qwen3.8-27b:free, maxSteps 12, structuredOutput]
+    → Agent Step [openrouter/deepseek-v4-flash-0731:free, maxSteps 12, structuredOutput]
     → Branch needs_human? → Approval → Slack/Discord post
   → Tables: repos, issues_memory, runs, digests
 MCP Server ON (Discovery + Tables read-only first)
@@ -53,13 +53,15 @@ Progress: `specs/status.yaml`. Verification: `specs/_system/verification.md` + `
 
 ## 5. Build order (1 week, Cloud + Vercel)
 
-- [ ] D1 — Specs + Cloud project + Tables schemas + MCP ON (`001`, `002`)
-- [ ] D2 — Knowledge Bases per repo (`002`)
-- [ ] D3 — Agent create + tools matrix + test 10 issues (`001`)
-- [ ] D4 — 3 flows, export JSON to `flows/` (`003`)
-- [ ] D5 — Next.js `/chat /runs /repos/new`, deploy Vercel (`004`)
-- [ ] D6 — Eval harness 20/repo, guardrails (`005`)
-- [ ] D7 — README + DEMO + Loom (triage live + repo switch)
+- [x] D1 — Specs + Cloud project + Tables created + MCP feature ON (`001`, `002`)
+- [ ] D2 — Knowledge Bases per repo (`002`) — needs Cloud UI upload
+- [~] D3 — Agent: public API disabled (402), so a tool-using **flow** stands in
+  (`scripts/cloud/build_flows.py`, live #15626 → bug/P1); Cloud Agent entity
+  itself still needs the UI
+- [x] D4 — 2 of 3 flows built/published/exported; `daily-digest` blocked on Slack (`003`)
+- [~] D5 — Next.js `/chat /runs /repos/new` green; Vercel deploy pending account
+- [x] D6 — Eval harness 20/repo, guardrails, live sweeps (`005`)
+- [~] D7 — README + DEMO updated for the live path; Loom optional
 
 ## 6. Secrets (you provide later — nothing hard-coded)
 

@@ -8,8 +8,10 @@ Triage any GitHub issue with a ReAct agent (OpenRouter free model + per-repo KB)
 
 - Provider: **OpenRouter** (first-class in Activepieces since 0.74.0:
   Platform Admin → AI Center → OpenRouter, usable in Agents).
-- Model: **`qwen/qwen3.8-27b:free`** — verified on the OpenRouter models API:
-  $0 in/out, 262K context, plenty for 12 tool steps + KB chunks.
+- Model: **`deepseek/deepseek-v4-flash-0731:free`** — verified live 2026-09-19
+  (real #15626 → bug/P1/conf 0.95). $0 in/out, long context, enough for 12
+  tool steps + KB chunks. The earlier pick `qwen/qwen3.8-27b:free` is the
+  documented fallback; both are env-swappable via `TRIAGE_MODEL`.
 - Why free-first: evals + demo run at $0; paid fallback only if the
   accuracy gate fails.
 - Known limits: free-tier rate caps (~tens of req/min, daily quotas) → run
@@ -17,8 +19,9 @@ Triage any GitHub issue with a ReAct agent (OpenRouter free model + per-repo KB)
   `gpt-4o`, so the **type-accuracy > 0.8 gate stays** and every run logs
   `provider/model` — a miss is a finding, not a surprise.
 - Live finding 2026-09-19: free shared pools throttle hard at times
-  (`qwen3.8-27b:free` AND `gemma-4-31b-it:free` both 429
-  `upstream_provider_shared_pool`, key itself valid $0/$5). Mitigations,
+  (`qwen3.8-27b:free` and `gemma-4-31b-it:free` both 429
+  `upstream_provider_shared_pool`, key itself valid $0/$5 → switched the
+  default to `deepseek-v4-flash:free`, which returned clean verdicts). Mitigations,
   in order: (1) retry later in small batches, (2) `TRIAGE_MODEL` to any
   of the ~25 `:free` models (provider-agnostic by design), (3) $5 credit
   unlocks paid routing + far higher limits. Direct path hardened anyway:

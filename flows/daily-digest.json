@@ -1,1 +1,82 @@
-{"_placeholder": true, "flow": "daily-digest", "todo": "Export from Cloud after D4 build, overwrite this file"}
+{
+  "id": "KQjkJrWUL1W89mFOTT0yn",
+  "created": "2026-09-19T16:38:34.097Z",
+  "updated": "2026-09-19T16:38:38.906Z",
+  "projectId": "SH4AM3jWQD7YeiEfhcRDw",
+  "externalId": "F5s8SdMPbiLETZ1Hvxffd",
+  "ownerId": null,
+  "folderId": null,
+  "status": "ENABLED",
+  "publishedVersionId": "umSizEM1uvpJPYYeWk8UR",
+  "metadata": null,
+  "operationStatus": "NONE",
+  "timeSavedPerRun": null,
+  "templateId": null,
+  "createdBy": null,
+  "version": {
+    "id": "umSizEM1uvpJPYYeWk8UR",
+    "created": "2026-09-19T16:38:34.097Z",
+    "updated": "2026-09-19T16:38:35.537Z",
+    "flowId": "KQjkJrWUL1W89mFOTT0yn",
+    "displayName": "daily-digest",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "every_day",
+      "nextAction": {
+        "name": "triage",
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "model": "{{variables.TRIAGE_MODEL}}",
+            "github_pat": "{{variables.GITHUB_PAT}}",
+            "openrouter_key": "{{variables.OPENROUTER_API_KEY}}"
+          },
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n  const t0 = Date.now();\n  const model = inputs.model || \"deepseek/deepseek-v4-flash-0731:free\";\n  const ghToken = inputs.github_pat || \"\";\n  const orKey = inputs.openrouter_key || \"\";\n  const REPOS = [\n    \"activepieces/activepieces\",\n    \"Deepjyoti-Sarmah/VibeCode\",\n    \"Deepjyoti-Sarmah/Invoice-Cart\",\n    \"Deepjyoti-Sarmah/symbolgraph\",\n  ];\n\n  const ghHeaders = {\n    Accept: \"application/vnd.github+json\",\n    \"User-Agent\": \"TriagePilot-Digest\",\n  };\n  if (ghToken) ghHeaders.Authorization = \"Bearer \" + ghToken;\n\n  async function recentIssues(repo) {\n    const q = encodeURIComponent(\"repo:\" + repo + \" is:issue is:open\");\n    try {\n      const res = await fetch(\n        \"https://api.github.com/search/issues?q=\" + q + \"&sort=created&order=desc&per_page=3\",\n        { headers: ghHeaders });\n      if (!res.ok) return [];\n      const d = await res.json();\n      return (d.items || []).map((it) => ({\n        repo,\n        number: it.number,\n        title: it.title,\n        url: it.html_url,\n        comments: it.comments || 0,\n      }));\n    } catch (_) {\n      return [];\n    }\n  }\n\n  const all = [];\n  for (const repo of REPOS) {\n    const items = await recentIssues(repo);\n    for (const it of items) all.push(it);\n  }\n  const top = all.slice(0, 10);\n  const list = top.map((i) => \"#\" + i.number + \" \" + i.title + \" (\" + i.repo + \", \" + i.comments + \" comments)\").join(\"\\n\");\n\n  let digest = \"Open issues snapshot (\" + (list ? top.length + \" issues\" : \"none\") + \"):\\n\" + (list || \"- none\");\n  if (orKey && top.length) {\n    try {\n      const res = await fetch(\"https://openrouter.ai/api/v1/chat/completions\", {\n        method: \"POST\",\n        headers: {\n          \"Content-Type\": \"application/json\",\n          Authorization: \"Bearer \" + orKey,\n          \"HTTP-Referer\": \"https://github.com/Deepjyoti-Sarmah\",\n          \"X-Title\": \"TriagePilot\",\n        },\n        body: JSON.stringify({\n          model,\n          messages: [\n            { role: \"system\", content: \"You are a maintainer. Summarize the open issues into a short daily digest: 3-6 bullets, most urgent first, then a one-line action list.\" },\n            { role: \"user\", content: list },\n          ],\n          temperature: 0.2,\n        }),\n      });\n      if (res.ok) {\n        const d = await res.json();\n        const text = (d && d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || \"\";\n        if (text.trim()) digest = text.trim();\n      }\n    } catch (_) { /* keep the raw snapshot */ }\n  }\n\n  return {\n    output: { digest, issues: top },\n    meta: { provider: \"activepieces\", model, mode: \"live-agent\", latency_ms: Date.now() - t0, tools_used: [\"github.search_issues\"].concat(orKey && top.length ? [\"openrouter.chat\"] : []) },\n  };\n};",
+            "packageJson": "{\"dependencies\": {}}"
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "displayName": "Triage (tools)",
+        "lastUpdatedDate": "2026-09-19T16:38:35.043Z"
+      },
+      "lastUpdatedDate": "2026-09-19T16:38:34.594Z",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "propertySettings": {},
+        "pieceName": "@activepieces/piece-schedule",
+        "pieceVersion": "0.1.22",
+        "triggerName": "every_day",
+        "input": {
+          "timezone": "Asia/Kolkata",
+          "hour_of_the_day": 9,
+          "run_on_weekends": true
+        }
+      }
+    },
+    "updatedBy": null,
+    "valid": true,
+    "schemaVersion": "27",
+    "agentIds": [],
+    "state": "LOCKED",
+    "connectionIds": [],
+    "backupFiles": null,
+    "notes": []
+  },
+  "triggerSource": {
+    "schedule": {
+      "type": "CRON_EXPRESSION",
+      "cronExpression": "0 9 * * *",
+      "timezone": "Asia/Kolkata"
+    }
+  }
+}

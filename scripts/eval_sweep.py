@@ -26,7 +26,7 @@ load_dotenv(ROOT / "apps" / "api" / ".env")
 os.environ.setdefault("TRIAGE_PROVIDER", "openrouter")
 os.environ.setdefault("TRIAGE_MODEL", "deepseek/deepseek-v4-flash-0731:free")
 
-from app.providers.direct import openrouter_provider  # noqa: E402
+from app.providers.registry import resolve_provider  # noqa: E402
 from app.providers.base import TriageInput  # noqa: E402
 from app.providers.activepieces import ProviderError  # noqa: E402
 
@@ -64,12 +64,12 @@ def stratify(rows, seed):
     return picked
 
 
-def run_row(row, pause=10):
+def run_row(provider, row, pause=10):
     last_err = "no attempt"
     for attempt in range(4):
         try:
             t0 = time.time()
-            res = openrouter_provider.triage(
+            res = provider.triage(
                 TriageInput(repo=row["repo"], issue_url=row["issue_url"],
                             title=row.get("title"), body=row.get("body")))
             return {"verdict": res.output.model_dump(), "meta": {
@@ -78,10 +78,12 @@ def run_row(row, pause=10):
                 "elapsed_s": round(time.time() - t0, 1)}
         except ProviderError as e:
             last_err = f"{e.code}: {e}"
-            if "429" in str(e) and attempt < 3:
-                print(f"  throttled, backing off 90s (attempt {attempt + 1})…",
-                      flush=True)
-                time.sleep(90)
+            # 429 = free-pool throttle; 408 = Cloud /sync webhook's 30s ceiling.
+            if ("429" in str(e) or "408" in str(e)) and attempt < 3:
+                wait = 90 if "429" in str(e) else 15
+                print(f"  transient ({e.code}), backing off {wait}s "
+                      f"(attempt {attempt + 1})…", flush=True)
+                time.sleep(wait)
                 continue
             break
         time.sleep(pause)
@@ -93,7 +95,11 @@ def main():
     ap.add_argument("--n", type=int, default=12)
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--out", default="sweep-001.json")
+    ap.add_argument("--provider", default=os.environ.get("TRIAGE_PROVIDER", "openrouter"),
+                    help="openrouter (direct) | activepieces (live Cloud flow)")
     args = ap.parse_args()
+    os.environ["TRIAGE_PROVIDER"] = args.provider
+    provider = resolve_provider()
 
     rows = load_dataset()
     sample = stratify(rows, args.seed)[:args.n]
@@ -104,7 +110,7 @@ def main():
     for i, row in enumerate(sample, 1):
         print(f"[{i}/{len(sample)}] {row['repo']} {row['issue_url'][-40:]} …",
               flush=True)
-        out = run_row(row)
+        out = run_row(provider, row)
         rec = {"expected_type": row["expected_type"],
                "expected_severity": row["expected_severity"],
                "is_duplicate": row["is_duplicate"],
@@ -127,7 +133,7 @@ def main():
     acc = sum(r["correct"] for r in scored) / len(scored) if scored else 0.0
     artifact = {
         "model": os.environ["TRIAGE_MODEL"],
-        "provider": "openrouter",
+        "provider": args.provider,
         "seed": args.seed,
         "gate": 0.8,
         "accuracy": round(acc, 3),
@@ -140,7 +146,11 @@ def main():
     out_path.write_text(json.dumps(artifact, indent=2))
     print(f"\naccuracy: {acc:.3f} ({sum(r['correct'] for r in scored)}/{len(scored)}) "
           f"gate 0.8 → {'PASS' if acc >= 0.8 else 'FAIL'}")
-    print(f"artifact: {out_path.relative_to(ROOT)}")
+    try:
+        shown = out_path.relative_to(ROOT)
+    except ValueError:
+        shown = out_path
+    print(f"artifact: {shown}")
 
 
 if __name__ == "__main__":

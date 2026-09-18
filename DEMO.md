@@ -55,5 +55,20 @@ cd apps/api && uvicorn app.main:app --port 8000
 cd apps/web && TRIAGE_API_URL=http://localhost:8000 npm run dev
 ```
 
-Total: under 5 minutes. Live Cloud/Vercel wiring is tracked in
-`specs/001`–`005` tasks and starts the day keys land.
+Total: under 5 minutes.
+
+## 7. Optional: show the live Cloud flow (keys in `apps/api/.env`)
+
+```bash
+python3 scripts/cloud/build_flows.py --all      # publish + export + print URLs
+curl -s -X POST "$(cat flows/mcp-maintainer-entry.url)" \
+  -H 'Content-Type: application/json' \
+  -d '{"repo":"activepieces/activepieces","issue_url":"https://github.com/activepieces/activepieces/issues/15626"}'
+# → {"output":{"issue_type":"bug","severity":"P1","confidence":0.95,...},
+#    "meta":{"tools_used":["github.get_issue","openrouter.chat"],...}}
+```
+
+The `activepieces` backend provider is selected automatically when
+`AP_FLOW_WEBHOOK_URL` is set; `TRIAGE_PROVIDER=mock` forces the keyless demo.
+Remaining Cloud-UI-only work (Agent entity, MCP trigger, KB upload, Vercel)
+is tracked in `specs/001`–`005` tasks.

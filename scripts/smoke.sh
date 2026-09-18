@@ -36,7 +36,8 @@ if [ ! -f .next/BUILD_ID ] || [ -n "$(find app lib components public package.jso
 fi
 ok "next build present"
 
-setsid nohup npm run start -- -p "$PORT" >/tmp/smoke-start.log 2>&1 < /dev/null & disown
+# Force mock: this suite must stay keyless even when local .env* holds keys.
+TRIAGE_PROVIDER=mock setsid nohup npm run start -- -p "$PORT" >/tmp/smoke-start.log 2>&1 < /dev/null & disown
 SERVER_PID=$!
 BOOTED=0
 for _ in $(seq 1 20); do
@@ -96,7 +97,7 @@ if echo "$codes" | grep -q "429"; then ok "rate limit trips (burst → 429)"; el
 echo ""
 echo "— python backend (spec 008) —"
 cd "$ROOT_DIR/apps/api"
-setsid nohup python3 -m uvicorn app.main:app --port "$API_PORT" >/tmp/smoke-api.log 2>&1 < /dev/null & disown
+TRIAGE_PROVIDER=mock setsid nohup python3 -m uvicorn app.main:app --port "$API_PORT" >/tmp/smoke-api.log 2>&1 < /dev/null & disown
 API_PID=$!
 ABOOTED=0
 for _ in $(seq 1 20); do

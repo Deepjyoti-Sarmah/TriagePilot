@@ -13,7 +13,7 @@ import { TriageOutput } from "../schema";
  */
 export const activepiecesProvider: TriageProvider = {
   name: "activepieces",
-  model: process.env.TRIAGE_MODEL || "qwen/qwen3.8-27b:free",
+  model: process.env.TRIAGE_MODEL || "deepseek/deepseek-v4-flash-0731:free",
   async triage(input: TriageInput): Promise<TriageResult> {
     const t0 = Date.now();
     const webhook = (process.env.AP_FLOW_WEBHOOK_URL || "").replace(/\/$/, "");
@@ -30,6 +30,8 @@ export const activepiecesProvider: TriageProvider = {
         repo: input.repo,
         issue_url: input.issue_url,
         model: (this as TriageProvider).model,
+        title: input.title,
+        body: input.body,
       }),
     });
     if (!res.ok) {

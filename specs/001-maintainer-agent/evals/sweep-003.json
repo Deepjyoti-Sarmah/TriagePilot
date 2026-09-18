@@ -1,0 +1,340 @@
+{
+  "model": "deepseek/deepseek-v4-flash-0731:free",
+  "provider": "activepieces",
+  "seed": 7,
+  "gate": 0.8,
+  "accuracy": 0.909,
+  "gate_pass": true,
+  "scored": 11,
+  "total": 12,
+  "rows": [
+    {
+      "expected_type": "bug",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15587",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P1",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [
+          "bug",
+          "area/management",
+          "support"
+        ],
+        "draft_reply": "Thanks for the detailed root cause and proposed fix. The missing SSH options and unguarded cleanup are clear wins \u2014 we'll add BatchMode/ConnectTimeout and switch to fs.rm with force. We'll also make sure the original error isn't swallowed by the finally block. Appreciate the reproduction and the reference to validateConnection.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 26524
+      },
+      "attempts": 1,
+      "elapsed_s": 26.5,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P0",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15616",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P1",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [
+          "\ud83d\udc1b bug",
+          "\ud83d\udee0\ufe0f area/infrastructure",
+          "\ud83d\udedf support",
+          "\ud83d\udcab priority"
+        ],
+        "draft_reply": "Thanks for the detailed root cause and fix. The tini init and /proc-based process tree read look like the right approach. Would you be open to opening a PR with the Dockerfile and system-usage.ts changes? Adding a regression test for the zombie leak would also be great.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 20042
+      },
+      "attempts": 1,
+      "elapsed_s": 20.0,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P2",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15627",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P2",
+        "confidence": 0.75,
+        "duplicate_of": null,
+        "labels": [
+          "bug",
+          "pricing",
+          "feature-availability"
+        ],
+        "draft_reply": "Thanks for the detailed report. We're checking why \"Build with Chat\" isn't surfacing in the Cloud editor despite being listed on the pricing page and docs. Could you confirm your workspace region and whether you see any beta feature flags in Platform Admin? In the meantime, we'll verify whether this is a rollout/availability issue or a UI placement bug.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 15579
+      },
+      "attempts": 1,
+      "elapsed_s": 15.6,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P2",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15621",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P2",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [
+          "\ud83d\udc1b bug",
+          "\ud83e\udde9 area/core-pieces",
+          "\ud83d\udedf support",
+          "\ud83d\udcab priority"
+        ],
+        "draft_reply": "Thanks for the detailed report. Agree this is a Crowdin-side issue; repo-only fixes will be overwritten on the next sync. We'll correct the four strings in Crowdin, merge the sync PR, bump piece-forms, and add a regression test to enforce the 3-backtick `text` block and `useDraft=true` in all i18n JSONs. We'll also consider moving the URL block out of translatable strings to prevent recurrence.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 24072
+      },
+      "attempts": 1,
+      "elapsed_s": 24.1,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P1",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15623",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P1",
+        "confidence": 0.97,
+        "duplicate_of": null,
+        "labels": [
+          "\ud83d\udc1b bug",
+          "\ud83d\udd04 area/flows",
+          "\ud83d\udedf support",
+          "\ud83d\udcab priority"
+        ],
+        "draft_reply": "Thanks for the detailed report and root-cause analysis. The `findOneByOrFail` fallback in `sendUpgradeAuditEvent` is indeed the regression from #15236 \u2014 switching to `findOneBy` and returning when no flow resolves is the right fix. Would you like to open a PR with the regression test in `flow-operations.test.ts`? Agreed on the follow-up to clean up orphaned flows when IMPORT_FLOW fails.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 15381
+      },
+      "attempts": 1,
+      "elapsed_s": 15.4,
+      "correct": true
+    },
+    {
+      "expected_type": "piece-request",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15596",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "piece-request",
+        "severity": "P3",
+        "confidence": 0.9,
+        "duplicate_of": null,
+        "labels": [
+          "feature",
+          "area/third-party-pieces",
+          "support"
+        ],
+        "draft_reply": "Thanks for the detailed proposal. Adding Entra ID service principal auth to the Microsoft SQL Server piece makes sense, and the fact that the bundled tedious already supports it keeps the change low-risk. We'll track this as a piece enhancement and follow up in the issue.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 14259
+      },
+      "attempts": 1,
+      "elapsed_s": 14.3,
+      "correct": true
+    },
+    {
+      "expected_type": "feature",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/VibeCode",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/VibeCode/pull/9",
+      "source": "github",
+      "error": "provider_error: MCP-entry flow returned 408.",
+      "attempts": 1,
+      "correct": false
+    },
+    {
+      "expected_type": "question",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/new?template=syn-question-1",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "question",
+        "severity": "P3",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [
+          "question"
+        ],
+        "draft_reply": "Hi! You can use the Loop action with a Google Sheets 'Get Rows' step to iterate over rows. If you're stuck, share your flow setup and we'll help. Also, check the loops docs for examples.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 22773
+      },
+      "attempts": 1,
+      "elapsed_s": 22.8,
+      "correct": true
+    },
+    {
+      "expected_type": "docs",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/VibeCode",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/VibeCode/issues/new?template=syn-env-docs",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/VibeCode",
+        "issue_type": "docs",
+        "severity": "P3",
+        "confidence": 0.9,
+        "duplicate_of": null,
+        "labels": [
+          "documentation"
+        ],
+        "draft_reply": "Thanks for flagging this! Documenting the required env vars for self-hosting would definitely help folks get up and running. Could you share which vars you're expecting to see documented, or any specific behavior you'd like confirmed? Happy to help clarify and review your PR once it's ready.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 13427
+      },
+      "attempts": 1,
+      "elapsed_s": 13.4,
+      "correct": true
+    },
+    {
+      "expected_type": "spam",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/symbolgraph",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/symbolgraph/issues/new?template=syn-spam-1",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/symbolgraph",
+        "issue_type": "spam",
+        "severity": "P3",
+        "confidence": 0.3,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "This is unsolicited promotional content. Closing as spam. If you believe this is a mistake, please respond.\n\nNo further action will be taken on this report.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 14862
+      },
+      "attempts": 1,
+      "elapsed_s": 14.9,
+      "correct": true
+    },
+    {
+      "expected_type": "spam",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/symbolgraph",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/symbolgraph/issues/new?template=syn-empty-1",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/symbolgraph",
+        "issue_type": "spam",
+        "severity": "P3",
+        "confidence": 0.2,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Empty issue body. Please provide a clear description of the problem or feature request. Closing as invalid. If this was a mistake, reopen with details.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 10337
+      },
+      "attempts": 1,
+      "elapsed_s": 10.3,
+      "correct": true
+    },
+    {
+      "expected_type": "duplicate",
+      "expected_severity": "P2",
+      "is_duplicate": true,
+      "repo": "Deepjyoti-Sarmah/symbolgraph",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/symbolgraph/issues/new?template=syn-dup-install",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/symbolgraph",
+        "issue_type": "bug",
+        "severity": "P1",
+        "confidence": 0.75,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Thanks for confirming. We need the full `uv sync` output and the relevant `pyproject.toml`/lockfile to reproduce this. Please also share `uv --version`, `python --version`, and macOS version. In the meantime, try `uv sync --no-binary tree-sitter` or upgrading to Python 3.10+ if possible.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 17366
+      },
+      "attempts": 1,
+      "elapsed_s": 17.4,
+      "correct": false
+    }
+  ]
+}

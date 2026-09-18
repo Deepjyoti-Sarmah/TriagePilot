@@ -1,1 +1,99 @@
-{"_placeholder": true, "flow": "webhook-github-intake", "todo": "Export from Cloud after D4 build, overwrite this file"}
+{
+  "id": "mvVQKTHZqd4HAlEWD3SyV",
+  "created": "2026-09-19T16:33:14.816Z",
+  "updated": "2026-09-19T16:33:22.933Z",
+  "projectId": "SH4AM3jWQD7YeiEfhcRDw",
+  "externalId": "N3K2PncqVOCpbiKZvFput",
+  "ownerId": null,
+  "folderId": null,
+  "status": "ENABLED",
+  "publishedVersionId": "cUkR2jIBJqBiwPYJ5WY7f",
+  "metadata": null,
+  "operationStatus": "NONE",
+  "timeSavedPerRun": null,
+  "templateId": null,
+  "createdBy": null,
+  "version": {
+    "id": "cUkR2jIBJqBiwPYJ5WY7f",
+    "created": "2026-09-19T16:33:14.816Z",
+    "updated": "2026-09-19T16:33:16.748Z",
+    "flowId": "mvVQKTHZqd4HAlEWD3SyV",
+    "displayName": "webhook-github-intake",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "nextAction": {
+        "name": "triage",
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "model": "{{variables.TRIAGE_MODEL}}",
+            "payload": "{{trigger.output.body}}",
+            "github_pat": "{{variables.GITHUB_PAT}}",
+            "openrouter_key": "{{variables.OPENROUTER_API_KEY}}"
+          },
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n  const t0 = Date.now();\n  const model = inputs.model || \"deepseek/deepseek-v4-flash-0731:free\";\n  const ghToken = inputs.github_pat || \"\";\n  const orKey = inputs.openrouter_key || \"\";\n  const toolsUsed = [];\n\n  const REPOS = {\n    \"activepieces/activepieces\": { tone: \"concise maintainer, link docs\" },\n    \"Deepjyoti-Sarmah/VibeCode\": { tone: \"friendly builder\" },\n    \"Deepjyoti-Sarmah/Invoice-Cart\": { tone: \"friendly builder\" },\n    \"Deepjyoti-Sarmah/symbolgraph\": { tone: \"technical, terse\" },\n  };\n\n  const TYPE_ENUM = [\"bug\", \"piece-request\", \"feature\", \"docs\", \"question\", \"spam\", \"duplicate\"];\n  const SEV_ENUM = [\"P0\", \"P1\", \"P2\", \"P3\"];\n\n  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));\n  const asString = (v) => (typeof v === \"string\" ? v : v == null ? \"\" : String(v));\n\n  function extractJson(text) {\n    try {\n      return JSON.parse(text);\n    } catch (_) { /* fall through */ }\n    const matches = String(text).match(/\\{[\\s\\S]*\\}/g) || [];\n    for (const m of matches) {\n      try { return JSON.parse(m); } catch (_) { /* next */ }\n    }\n    return null;\n  }\n\n  function parseRef(url) {\n    const m = String(url).match(/github\\.com\\/([^/]+\\/[^/]+)\\/(?:issues|pull)\\/(\\d+)/);\n    return m ? { repoPath: m[1], number: Number(m[2]) } : null;\n  }\n\n  function ghHeaders() {\n    const h = { Accept: \"application/vnd.github+json\", \"User-Agent\": \"TriagePilot-CloudFlow\" };\n    if (ghToken) h.Authorization = \"Bearer \" + ghToken;\n    return h;\n  }\n\n  async function fetchIssue(repoPath, number) {\n    const res = await fetch(\"https://api.github.com/repos/\" + repoPath + \"/issues/\" + number, { headers: ghHeaders() });\n    if (!res.ok) return { status: res.status };\n    const d = await res.json();\n    return {\n      status: 200,\n      title: asString(d.title),\n      body: asString(d.body).slice(0, 6000),\n      state: d.state,\n      labels: Array.isArray(d.labels) ? d.labels.map((l) => (typeof l === \"string\" ? l : l && l.name)).filter(Boolean) : [],\n      is_pull_request: Boolean(d.pull_request),\n      comments: d.comments || 0,\n      user: d.user && d.user.login ? d.user.login : null,\n    };\n  }\n\n  const STOP = new Set([\"this\", \"that\", \"with\", \"from\", \"have\", \"when\", \"what\", \"your\", \"does\", \"doesn\", \"after\", \"before\", \"into\", \"issue\", \"error\", \"using\", \"unable\", \"cannot\", \"failed\", \"unexpected\", \"getting\"]);\n  function searchTerms(title) {\n    return String(title).toLowerCase().replace(/[^a-z0-9\\s-]/g, \" \").split(/\\s+/)\n      .filter((w) => w.length > 3 && !STOP.has(w)).slice(0, 6);\n  }\n\n  async function dedupeSearch(repoPath, title, currentNumber) {\n    const terms = searchTerms(title);\n    if (!terms.length) return [];\n    const q = encodeURIComponent(\"repo:\" + repoPath + \" is:issue \" + terms.join(\" \"));\n    try {\n      const res = await fetch(\"https://api.github.com/search/issues?q=\" + q + \"&per_page=5\", { headers: ghHeaders() });\n      if (!res.ok) return [];\n      const d = await res.json();\n      return (d.items || [])\n        .filter((it) => it.number !== currentNumber)\n        .slice(0, 3)\n        .map((it) => ({ number: it.number, title: it.title, state: it.state }));\n    } catch (_) {\n      return [];\n    }\n  }\n\n  const hold = (repo, reason) => ({\n    repo,\n    issue_type: \"question\",\n    severity: \"P3\",\n    confidence: 0.4,\n    duplicate_of: null,\n    labels: [\"question\"],\n    draft_reply: \"Cloud flow could not verify this issue (\" + reason + \"). Routed to a human maintainer.\",\n    needs_human: true,\n  });\n\n  // Cloud passes the whole webhook body as `payload`; local tests pass flat inputs.\n  let rawPayload = inputs.payload;\n  if (typeof rawPayload === \"string\") {\n    try { rawPayload = JSON.parse(rawPayload); } catch (_) { rawPayload = null; }\n  }\n  const p = rawPayload && typeof rawPayload === \"object\" ? rawPayload : inputs;\n  let repo = asString(p.repo);\n  let issueUrl = asString(p.issue_url);\n  // GitHub \"issues\" webhook event normalization (used by webhook-github-intake).\n  if (!issueUrl && p.issue && p.repository) {\n    repo = repo || asString(p.repository.full_name);\n    issueUrl = asString(p.issue.html_url) ||\n      \"https://github.com/\" + repo + \"/issues/\" + asString(p.issue.number);\n  }\n  if (!REPOS[repo]) {\n    return { status: \"error\", code: \"unknown_repo\", message: \"Repo not in registry: \" + repo, meta: { provider: \"activepieces\", model, mode: \"live-agent\", latency_ms: Date.now() - t0 } };\n  }\n\n  // Inline content (synthetic evals) wins over GitHub fetch.\n  let context;\n  let candidates = [];\n  let ref = parseRef(issueUrl);\n  const hasInlineTitle = p.title != null && String(p.title).trim() !== \"\";\n  const hasInlineBody = p.body != null && String(p.body).trim() !== \"\";\n  if (hasInlineTitle || hasInlineBody) {\n    context = \"Title: \" + asString(p.title).trim() + \"\\nBody: \" + (asString(p.body).trim().slice(0, 6000) || \"(empty)\");\n  } else if (ref) {\n    const issue = await fetchIssue(ref.repoPath, ref.number);\n    if (issue.status !== 200) {\n      return { output: hold(repo, \"GitHub API returned \" + issue.status), meta: { provider: \"activepieces\", model, mode: \"live-agent\", latency_ms: Date.now() - t0, tools_used: [\"github.get_issue\"] } };\n    }\n    toolsUsed.push(\"github.get_issue\");\n    context = \"Title: \" + issue.title + \"\\nBody: \" + (issue.body || \"(empty)\") +\n      \"\\nState: \" + issue.state + \" | Comments: \" + issue.comments + \" | Author: \" + (issue.user || \"unknown\") +\n      (issue.labels.length ? \" | Labels: \" + issue.labels.join(\", \") : \"\") +\n      (issue.is_pull_request ? \"\\nNOTE: this is a pull request.\" : \"\");\n    candidates = await dedupeSearch(ref.repoPath, issue.title, ref.number);\n    if (candidates.length) toolsUsed.push(\"github.search_duplicates\");\n  } else {\n    context = \"Title: \\nBody: (could not parse issue reference from URL)\";\n  }\n\n  const candText = candidates.length\n    ? candidates.map((c) => \"#\" + c.number + \" [\" + c.state + \"] \" + c.title).join(\"\\n\")\n    : \"(none)\";\n\n  const system = [\n    \"You triage ONE GitHub issue for repo \" + repo + \" (tone: \" + REPOS[repo].tone + \").\",\n    \"You have already run tools: the issue title+body and duplicate-candidate search are in the user message.\",\n    \"Return JSON ONLY, exactly:\",\n    '{\"issue_type\":\"bug|piece-request|feature|docs|question|spam|duplicate\",\"severity\":\"P0|P1|P2|P3\",\"confidence\":0.0-1.0,\"duplicate_of\":null,\"labels\":[],\"draft_reply\":\"3-6 lines, repo tone\",\"needs_human\":true|false}',\n    \"Rules:\",\n    \"- If duplicate candidates clearly match this report, set issue_type \\\"duplicate\\\" and duplicate_of to that issue number. Otherwise duplicate_of null.\",\n    \"- Empty/gibberish/promo body -> issue_type \\\"spam\\\", confidence <= 0.3, needs_human true.\",\n    \"- Crash/500/auth-breakage/data-loss words -> severity P0/P1, needs_human true.\",\n    \"- \\\"How do I / can I / where\\\" -> \\\"question\\\", P3. Missing-docs complaints -> \\\"docs\\\", P3.\",\n    \"- New integration asks -> \\\"piece-request\\\", P3.\",\n    \"- Unsure -> confidence <= 0.6, needs_human true. Never invent URLs or issue numbers.\",\n  ].join(\"\\n\");\n\n  const user = \"Repo: \" + repo + \"\\nURL: \" + issueUrl + \"\\n\" + context + \"\\n\\nDuplicate candidates:\\n\" + candText;\n\n  let output;\n  try {\n    if (!orKey) throw new Error(\"missing openrouter key\");\n    const res = await fetch(\"https://openrouter.ai/api/v1/chat/completions\", {\n      method: \"POST\",\n      headers: {\n        \"Content-Type\": \"application/json\",\n        Authorization: \"Bearer \" + orKey,\n        \"HTTP-Referer\": \"https://github.com/Deepjyoti-Sarmah\",\n        \"X-Title\": \"TriagePilot\",\n      },\n      body: JSON.stringify({\n        model,\n        messages: [\n          { role: \"system\", content: system },\n          { role: \"user\", content: user },\n        ],\n        temperature: 0.2,\n        response_format: { type: \"json_object\" },\n      }),\n    });\n    if (!res.ok) throw new Error(\"openrouter \" + res.status);\n    const data = await res.json();\n    const text = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || \"\";\n    const parsed = extractJson(text);\n    if (!parsed || typeof parsed !== \"object\") throw new Error(\"bad model JSON\");\n    toolsUsed.push(\"openrouter.chat\");\n    const type = TYPE_ENUM.includes(parsed.issue_type) ? parsed.issue_type : \"question\";\n    const severity = SEV_ENUM.includes(parsed.severity) ? parsed.severity : \"P3\";\n    let duplicateOf = Number.isInteger(parsed.duplicate_of) ? parsed.duplicate_of : null;\n    if (type !== \"duplicate\") duplicateOf = null;\n    if (type === \"duplicate\" && duplicateOf == null && candidates.length) duplicateOf = candidates[0].number;\n    const confidence = clamp(Number(parsed.confidence) || 0, 0, 1);\n    const labels = Array.isArray(parsed.labels) ? parsed.labels.map(asString).filter(Boolean).slice(0, 6) : [];\n    let draft = asString(parsed.draft_reply).trim();\n    if (draft.length < 10) draft = \"Thanks for the report. A maintainer will take a look shortly.\";\n    if (draft.length > 2000) draft = draft.slice(0, 1990) + \" ...\";\n    output = {\n      repo,\n      issue_type: type,\n      severity,\n      confidence,\n      duplicate_of: duplicateOf,\n      labels,\n      draft_reply: draft,\n      needs_human: Boolean(parsed.needs_human) || confidence < 0.8 || severity === \"P0\",\n    };\n  } catch (e) {\n    output = hold(repo, String(e && e.message ? e.message : e));\n  }\n\n  return {\n    output,\n    meta: {\n      provider: \"activepieces\",\n      model,\n      mode: \"live-agent\",\n      latency_ms: Date.now() - t0,\n      tools_used: toolsUsed,\n      duplicate_candidates: candidates,\n    },\n  };\n};",
+            "packageJson": "{\"dependencies\": {}}"
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "return_response",
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "fields": {
+                "body": "{{triage.output}}",
+                "status": 200,
+                "headers": {}
+              },
+              "respond": "stop",
+              "responseType": "json"
+            },
+            "pieceName": "@activepieces/piece-webhook",
+            "actionName": "return_response",
+            "pieceVersion": "0.1.41",
+            "propertySettings": {}
+          },
+          "displayName": "Return Response",
+          "lastUpdatedDate": "2026-09-19T16:33:16.286Z"
+        },
+        "displayName": "Triage (tools)",
+        "lastUpdatedDate": "2026-09-19T16:33:15.716Z"
+      },
+      "lastUpdatedDate": "2026-09-19T16:33:15.291Z",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "propertySettings": {},
+        "pieceName": "@activepieces/piece-webhook",
+        "pieceVersion": "0.1.41",
+        "triggerName": "catch_webhook",
+        "input": {
+          "authType": "none"
+        }
+      }
+    },
+    "updatedBy": null,
+    "valid": true,
+    "schemaVersion": "27",
+    "agentIds": [],
+    "state": "LOCKED",
+    "connectionIds": [],
+    "backupFiles": null,
+    "notes": []
+  },
+  "triggerSource": {
+    "schedule": null
+  }
+}

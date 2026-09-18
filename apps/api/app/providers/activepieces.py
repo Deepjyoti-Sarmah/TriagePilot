@@ -25,7 +25,7 @@ class ProviderError(Exception):
 
 class ActivepiecesProvider:
     name = NAME
-    model = os.environ.get("TRIAGE_MODEL", "qwen/qwen3.8-27b:free")
+    model = os.environ.get("TRIAGE_MODEL", "deepseek/deepseek-v4-flash-0731:free")
 
     def triage(self, inp: TriageInput) -> ProviderResult:
         t0 = time.time()
@@ -41,7 +41,8 @@ class ActivepiecesProvider:
                 webhook,
                 headers={"Content-Type": "application/json"},
                 json={"repo": inp.repo, "issue_url": inp.issue_url,
-                      "model": self.model},
+                      "model": self.model,
+                      "title": inp.title, "body": inp.body},
                 timeout=90,
             )
         except httpx.HTTPError as e:

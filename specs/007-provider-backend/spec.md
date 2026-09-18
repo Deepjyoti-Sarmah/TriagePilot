@@ -36,6 +36,11 @@ change. The backend must treat providers as plugins.
   it at request time with an inline fallback (single source = spec file).
 - FR-6: Unknown `TRIAGE_PROVIDER` value → 400 `unknown_provider`
   (fail loud, never silent-fallback to mock when keys exist).
+- FR-7: Known ceiling: the Cloud `/sync` webhook answers within
+  `WEBHOOK_TIMEOUT_SECONDS` (30s on Cloud). A slow model call returns HTTP
+  408 while the run keeps executing; `eval_sweep.py` retries 408 and the
+  row is excluded from scoring if it persists. Keep agent calls under ~25s
+  or poll `flow-runs` for async completion.
 
 ## 5. Contracts
 

@@ -1,0 +1,34 @@
+{
+  "captured": "2026-09-19T16:34:30.282610Z",
+  "path": "live-agent via Activepieces Cloud flow (webhook-github-trigger -> Code tools -> Return Response)",
+  "flow_id": "ZjGEeTfUZAQtXVrASMgIf",
+  "flow_url": "https://cloud.activepieces.com/api/v1/webhooks/ZjGEeTfUZAQtXVrASMgIf/sync",
+  "request": {
+    "repo": "activepieces/activepieces",
+    "issue_url": "https://github.com/activepieces/activepieces/issues/15626"
+  },
+  "output": {
+    "repo": "activepieces/activepieces",
+    "issue_type": "bug",
+    "severity": "P1",
+    "confidence": 0.95,
+    "duplicate_of": null,
+    "labels": [
+      "bug",
+      "area/flows"
+    ],
+    "draft_reply": "Thanks for the detailed report and root-cause analysis. This looks like a real data-loss bug: the parent is failed before the child job exhausts its retries, and the late callback is silently dropped. We'll prioritize fixing `shouldMarkParentAsFailed` to wait for the terminal attempt, and make the resume path return a non-2xx when the parent is terminal. Appreciate the repro steps and regression test list.",
+    "needs_human": true
+  },
+  "meta": {
+    "provider": "activepieces",
+    "model": "deepseek/deepseek-v4-flash-0731:free",
+    "mode": "live-agent",
+    "latency_ms": 11314,
+    "tools_used": [
+      "github.get_issue",
+      "openrouter.chat"
+    ],
+    "duplicate_candidates": []
+  }
+}

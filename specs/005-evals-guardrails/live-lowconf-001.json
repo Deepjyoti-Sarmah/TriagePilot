@@ -1,0 +1,31 @@
+{
+  "captured": "2026-09-19T16:34:30.282610Z",
+  "guardrail": "conf < 0.8 or P0 or spam -> needs_human=true (spec 001 FR-3)",
+  "case": "unresolvable issue URL (GitHub API 404) -> hold for human",
+  "flow_id": "ZjGEeTfUZAQtXVrASMgIf",
+  "request": {
+    "repo": "activepieces/activepieces",
+    "issue_url": "https://github.com/activepieces/activepieces/issues/999999"
+  },
+  "output": {
+    "repo": "activepieces/activepieces",
+    "issue_type": "question",
+    "severity": "P3",
+    "confidence": 0.4,
+    "duplicate_of": null,
+    "labels": [
+      "question"
+    ],
+    "draft_reply": "Cloud flow could not verify this issue (GitHub API returned 404). Routed to a human maintainer.",
+    "needs_human": true
+  },
+  "meta": {
+    "provider": "activepieces",
+    "model": "deepseek/deepseek-v4-flash-0731:free",
+    "mode": "live-agent",
+    "latency_ms": 332,
+    "tools_used": [
+      "github.get_issue"
+    ]
+  }
+}

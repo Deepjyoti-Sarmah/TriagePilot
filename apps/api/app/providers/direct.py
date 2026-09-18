@@ -24,7 +24,7 @@ PRESETS = {
     "openrouter": {
         "base": "https://openrouter.ai/api/v1",
         "key_env": "OPENROUTER_API_KEY",
-        "model": "qwen/qwen3.8-27b:free",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
         "headers": {"HTTP-Referer": "https://github.com/Deepjyoti-Sarmah",
                     "X-Title": "TriagePilot"},
     },

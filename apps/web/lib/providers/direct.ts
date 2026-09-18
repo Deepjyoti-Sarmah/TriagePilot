@@ -31,7 +31,7 @@ const PRESETS: Record<DirectName, { baseUrl: string; keyEnv: string; defaultMode
   openrouter: {
     baseUrl: "https://openrouter.ai/api/v1",
     keyEnv: "OPENROUTER_API_KEY",
-    defaultModel: "qwen/qwen3.8-27b:free",
+    defaultModel: "deepseek/deepseek-v4-flash-0731:free",
   },
   openai: {
     baseUrl: "https://api.openai.com/v1",

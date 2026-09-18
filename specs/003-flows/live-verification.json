@@ -1,0 +1,40 @@
+{
+  "captured": "2026-09-19T16:38:50.521109+00:00",
+  "flows": [
+    {
+      "name": "mcp-maintainer-entry",
+      "id": "ZjGEeTfUZAQtXVrASMgIf",
+      "url": "https://cloud.activepieces.com/api/v1/webhooks/ZjGEeTfUZAQtXVrASMgIf/sync",
+      "trigger": "catch_webhook (auth none, /sync returns response)",
+      "steps": [
+        "triage (CODE, tool-using)",
+        "return_response (webhook piece)"
+      ],
+      "status": "ENABLED",
+      "live_proof": "#15626 -> bug/P1/conf 0.95, tools [github.get_issue, openrouter.chat]"
+    },
+    {
+      "name": "webhook-github-intake",
+      "id": "mvVQKTHZqd4HAlEWD3SyV",
+      "url": "https://cloud.activepieces.com/api/v1/webhooks/mvVQKTHZqd4HAlEWD3SyV/sync",
+      "trigger": "catch_webhook + GitHub issues event normalization in code",
+      "steps": [
+        "triage (CODE, tool-using)",
+        "return_response (webhook piece)"
+      ],
+      "status": "ENABLED",
+      "live_proof": "GitHub issues event for #15616 -> bug/P1"
+    },
+    {
+      "name": "daily-digest",
+      "id": "KQjkJrWUL1W89mFOTT0yn",
+      "trigger": "@activepieces/piece-schedule every_day 09:00 Asia/Kolkata",
+      "steps": [
+        "digest (CODE: GitHub search + OpenRouter summary)"
+      ],
+      "status": "ENABLED",
+      "live_proof": "scheduled; Slack/Discord post pending a webhook secret"
+    }
+  ],
+  "notes": "Cloud Agent entity + MCP server remain UI-only: public API returns 402 FEATURE_DISABLED for /v1/agents and 403 for MCP routes. The flows above are the programmatic, firewall-friendly path used by the activepieces provider. Build them with: python3 scripts/cloud/build_flows.py --all"
+}

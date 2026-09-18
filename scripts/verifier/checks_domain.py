@@ -65,6 +65,8 @@ def check_secrets() -> None:
                 continue
             if p.name in ("verify.py",) or "verifier" in p.parts:
                 continue  # patterns live here by design
+            if "__pycache__" in p.parts or p.suffix == ".pyc":
+                continue  # compiled bytecode of the patterns above
             try:
                 text = p.read_text(errors="ignore")
             except Exception:
