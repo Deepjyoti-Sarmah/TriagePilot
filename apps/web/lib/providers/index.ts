@@ -13,11 +13,8 @@ const REGISTRY: Record<string, TriageProvider> = {
 export const PROVIDER_NAMES = Object.keys(REGISTRY);
 
 function apConfigured(): boolean {
-  return Boolean(
-    process.env.AP_API_KEY &&
-      process.env.AP_PROJECT_ID &&
-      process.env.AP_MCP_URL
-  );
+  // Webhook is the only live requirement (OAuth MCP has no static token).
+  return Boolean(process.env.AP_FLOW_WEBHOOK_URL);
 }
 
 /** Resolve provider from TRIAGE_PROVIDER, with safe documented defaults. */

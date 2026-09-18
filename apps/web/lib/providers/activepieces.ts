@@ -2,31 +2,31 @@ import type { TriageInput, TriageProvider, TriageResult } from "./types";
 import { TriageOutput } from "../schema";
 
 /**
- * Full ReAct agent path: POSTs to the Cloud MCP-entry flow
- * (spec 003 `mcp-maintainer-entry`), which runs the agent step with
- * tools + KB + approvals and returns structured JSON.
- * Lands in D4 once AP_* keys exist. Until then: fail closed (501).
+ * Full ReAct agent path: POSTs to the Cloud MCP-entry flow's webhook URL
+ * (spec 003 `mcp-maintainer-entry`, returnsResponse:true), which runs the
+ * agent step with tools + KB + approvals and returns structured JSON.
+ *
+ * Auth note (verified 2026-09-19): the MCP server at /mcp is OAuth-only
+ * ("No API keys to manage") — no static token exists. Webhook triggers
+ * are the firewall-friendly path: set AP_FLOW_WEBHOOK_URL after creating
+ * the flow in Cloud. Until then: fail closed (501).
  */
 export const activepiecesProvider: TriageProvider = {
   name: "activepieces",
   model: process.env.TRIAGE_MODEL || "qwen/qwen3.8-27b:free",
   async triage(input: TriageInput): Promise<TriageResult> {
     const t0 = Date.now();
-    const base = (process.env.AP_MCP_URL || "").replace(/\/$/, "");
-    if (!process.env.AP_API_KEY || !process.env.AP_PROJECT_ID || !base) {
+    const webhook = (process.env.AP_FLOW_WEBHOOK_URL || "").replace(/\/$/, "");
+    if (!webhook) {
       throw Object.assign(
-        new Error("Activepieces provider needs AP_API_KEY, AP_PROJECT_ID, AP_MCP_URL."),
+        new Error("Activepieces provider needs AP_FLOW_WEBHOOK_URL (flow webhook from spec 003)."),
         { status: 501, code: "not_wired" }
       );
     }
-    const res = await fetch(`${base}/maintainer-entry`, {
+    const res = await fetch(webhook, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.AP_API_KEY}`,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        projectId: process.env.AP_PROJECT_ID,
         repo: input.repo,
         issue_url: input.issue_url,
         model: (this as TriageProvider).model,

@@ -25,9 +25,12 @@ change. The backend must treat providers as plugins.
 - FR-3: Every response carries `meta.provider/model/mode`; `runs` log and
   `Tables.runs` store them (see `tables/schema.sql`).
 - FR-4: `activepieces` = full ReAct agent (tools, KB, approvals) via the
-  MCP-entry flow. `openrouter`/`openai` = **classify-only** direct calls
-  (no tools): same JSON contract, `needs_human: true` forced when
-  confidence < 0.8 or output fails schema validation.
+  MCP-entry flow **webhook URL** (`AP_FLOW_WEBHOOK_URL`). Verified
+  2026-09-19: the MCP server is OAuth-only (API key → 401), so the
+  webhook trigger is the programmatic path. `openrouter`/`openai` =
+  **classify-only** direct calls (no tools): same JSON contract,
+  `needs_human: true` forced when confidence < 0.8 or output fails
+  schema validation.
 - FR-5: Classify prompt is versioned at
   `specs/007-provider-backend/contracts/direct.prompt.md`; the code loads
   it at request time with an inline fallback (single source = spec file).

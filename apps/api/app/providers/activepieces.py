@@ -1,5 +1,9 @@
-"""Full-agent path via the Cloud MCP-entry flow (spec 003). Fails closed (501)
-until AP_* keys exist — same contract as the TS provider.
+"""Full-agent path via the Cloud MCP-entry flow webhook (spec 003).
+
+Auth note (verified 2026-09-19): the MCP server at /mcp is OAuth-only —
+no static token exists, and the API key is rejected there (401). Flow
+webhook triggers are the firewall-friendly path: set AP_FLOW_WEBHOOK_URL
+after creating the flow in Cloud. Until then: fail closed (501).
 """
 import os
 import time
@@ -13,7 +17,7 @@ NAME = "activepieces"
 
 
 class ProviderError(Exception):
-    def __init__(self, message: str, status: int = 502, code: str = "provider_error"):
+    def __init__(self, message: str, status: int = 500, code: str = "provider_error"):
         super().__init__(message)
         self.status = status
         self.code = code
@@ -25,24 +29,23 @@ class ActivepiecesProvider:
 
     def triage(self, inp: TriageInput) -> ProviderResult:
         t0 = time.time()
-        api_key = os.environ.get("AP_API_KEY", "")
-        project = os.environ.get("AP_PROJECT_ID", "")
-        base = os.environ.get("AP_MCP_URL", "").rstrip("/")
-        if not (api_key and project and base):
+        webhook = os.environ.get("AP_FLOW_WEBHOOK_URL", "").rstrip("/")
+        if not webhook:
             raise ProviderError(
-                "Activepieces provider needs AP_API_KEY, AP_PROJECT_ID, AP_MCP_URL.",
+                "Activepieces provider needs AP_FLOW_WEBHOOK_URL "
+                "(flow webhook from spec 003).",
                 status=501, code="not_wired",
             )
         try:
             res = httpx.post(
-                f"{base}/maintainer-entry",
-                headers={"Content-Type": "application/json", "Authorization": f"Bearer {api_key}"},
-                json={"projectId": project, "repo": inp.repo,
-                      "issue_url": inp.issue_url, "model": self.model},
+                webhook,
+                headers={"Content-Type": "application/json"},
+                json={"repo": inp.repo, "issue_url": inp.issue_url,
+                      "model": self.model},
                 timeout=90,
             )
         except httpx.HTTPError as e:
-            raise ProviderError(f"MCP-entry flow unreachable: {e}.") from e
+            raise ProviderError(f"Flow webhook unreachable: {e}.") from e
         if res.status_code >= 400:
             raise ProviderError(f"MCP-entry flow returned {res.status_code}.")
         try:

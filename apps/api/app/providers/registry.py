@@ -21,9 +21,8 @@ PROVIDER_NAMES = list(REGISTRY.keys())
 
 
 def ap_configured() -> bool:
-    return bool(os.environ.get("AP_API_KEY")
-                and os.environ.get("AP_PROJECT_ID")
-                and os.environ.get("AP_MCP_URL"))
+    # Webhook is the only live requirement (OAuth MCP has no static token).
+    return bool(os.environ.get("AP_FLOW_WEBHOOK_URL"))
 
 
 def resolve_provider():
