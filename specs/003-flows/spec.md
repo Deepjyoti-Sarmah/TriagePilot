@@ -23,3 +23,12 @@ Agent alone can't receive GitHub events, run daily, or be called as a Gravity-st
 ## 5. Contracts
 
 - `flows/webhook-github-intake.json`, `flows/daily-digest.json`, `flows/mcp-maintainer-entry.json` (Cloud exports).
+
+## Verified building blocks (2026-09-19, live API)
+
+- Tables `repos/issues_memory/runs/digests` created in Cloud (see 002 tasks for ids).
+- Dedupe recall proven with `GITHUB_PAT`: search
+  `repo:activepieces/activepieces is:issue IMPORT_FLOW piece-upgrade`
+  returns #15623 top-1 — the exact query shape the dedupe-check flow
+  will use (distinctive body terms → candidate set).
+- Note: search API requires `is:issue`/`is:pr` qualifier (422 otherwise).
