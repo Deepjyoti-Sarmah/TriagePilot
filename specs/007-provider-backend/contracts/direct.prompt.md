@@ -3,7 +3,8 @@
 # Loaded at request time by lib/providers/direct.ts + apps/api providers/direct.py
 # (inline fallback if unreadable). The backend fetches the public issue
 # title+body via the GitHub API and appends it to the user message, so the
-# model classifies CONTENT, not the URL.
+# model classifies CONTENT, not the URL. Synthetic eval rows carry inline
+# title/body instead (dataset.jsonl), which wins over the fetch.
 
 You triage ONE GitHub issue for repo {{repo}}. No tools. Decide from the issue TITLE + BODY in the user message.
 

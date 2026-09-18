@@ -1,0 +1,322 @@
+{
+  "model": "deepseek/deepseek-v4-flash-0731:free",
+  "provider": "openrouter",
+  "seed": 7,
+  "gate": 0.8,
+  "accuracy": 0.8,
+  "gate_pass": true,
+  "scored": 10,
+  "total": 12,
+  "rows": [
+    {
+      "expected_type": "bug",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15587",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P2",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [
+          "bug",
+          "git-sync",
+          "error-handling"
+        ],
+        "draft_reply": "Thanks for the detailed report and root-cause analysis. The missing ConnectTimeout/BatchMode and the unguarded cleanup in the finally block are both real issues. Would you like to open a PR with the proposed fix? We can also look into adding coverage for validateConnection by adjusting the AP_ENVIRONMENT guard. Appreciate the clear reproduction steps!",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 30441
+      },
+      "attempts": 1,
+      "elapsed_s": 30.4,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P0",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15616",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P1",
+        "confidence": 0.97,
+        "duplicate_of": null,
+        "labels": [
+          "bug",
+          "worker",
+          "crash"
+        ],
+        "draft_reply": "Thanks for the detailed root-cause analysis. This is a serious worker crash and zombie leak under PID 1, and the uncatchable E2BIG from systeminformation makes it worse. We'll prioritize a fix; the tini entrypoint and direct /proc read look like the right approach. If you have a PR, we're happy to review it. The shareProcessNamespace mitigation is a good workaround in the meantime.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 25574
+      },
+      "attempts": 1,
+      "elapsed_s": 25.6,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P2",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15627",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P2",
+        "confidence": 0.85,
+        "duplicate_of": null,
+        "labels": [
+          "bug",
+          "pricing",
+          "docs",
+          "feature-availability"
+        ],
+        "draft_reply": "Thanks for reporting this! We're sorry the 'Build with Chat' feature isn't showing up in your Cloud workspace. We're investigating why it's listed on the pricing page but not available in the editor. Could you confirm if you're on the Free plan? In the meantime, we'll check if this is a rollout issue or a documentation error. Appreciate your patience!",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 29941
+      },
+      "attempts": 1,
+      "elapsed_s": 29.9,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P2",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15621",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P2",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [
+          "bug",
+          "forms",
+          "i18n"
+        ],
+        "draft_reply": "Thanks for the detailed report and root-cause analysis. This is a translation regression from the Crowdin sync \u2014 the malformed code fence and `?seDraft=true` typo break the Draft Form URL in de/fr/nl. We'll fix the strings in Crowdin, bump piece-forms, and add a regression test to keep the `text` block and `useDraft` query intact. Appreciate the references to the exact files and lines.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 36974
+      },
+      "attempts": 1,
+      "elapsed_s": 37.0,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P1",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15623",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P1",
+        "confidence": 0.98,
+        "duplicate_of": null,
+        "labels": [
+          "bug"
+        ],
+        "draft_reply": "Thanks for the excellent write-up and root-cause analysis. This is a clear regression from #15236: the v23 piece-upgrade audit path assumes a persisted flow exists, but template import passes an empty flow id during preValidation, so `findOneByOrFail` throws and turns IMPORT_FLOW into a 500. The proposed fix (fall back to `findOneBy` and skip auditing when no flow resolves) looks correct and keeps upgrades applied while avoiding the crash. We'll also follow up on cleaning up the orphaned empty flow when import fails. Want to open a PR with the regression test, or should we pick it up from here?",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 11385
+      },
+      "attempts": 1,
+      "elapsed_s": 11.4,
+      "correct": true
+    },
+    {
+      "expected_type": "piece-request",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15596",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "piece-request",
+        "severity": "P3",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [
+          "feature",
+          "piece-request",
+          "microsoft-sql-server"
+        ],
+        "draft_reply": "Thanks for the detailed proposal! Adding Entra ID service principal auth to the Microsoft SQL Server piece would be a great enhancement. We'll review the mssql/tedious support and consider implementing it. Contributions are welcome if you'd like to open a PR.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 17939
+      },
+      "attempts": 1,
+      "elapsed_s": 17.9,
+      "correct": true
+    },
+    {
+      "expected_type": "feature",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/VibeCode",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/VibeCode/pull/9",
+      "source": "github",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/VibeCode",
+        "issue_type": "spam",
+        "severity": "P3",
+        "confidence": 0.2,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Thanks for opening this PR. The description is empty, so we can't tell what changes you've made. Please update the description with a summary of your changes and any relevant context. This helps reviewers understand your work. If this is a draft or work-in-progress, let us know what's still missing.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 27178
+      },
+      "attempts": 1,
+      "elapsed_s": 27.2,
+      "correct": false
+    },
+    {
+      "expected_type": "question",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/new?template=syn-question-1",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "question",
+        "severity": "P3",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [
+          "question"
+        ],
+        "draft_reply": "Hi! To loop over Google Sheets rows in Activepieces, you can use the 'Loop on Items' action after a Google Sheets 'Read Rows' step. Add the read action, then add 'Loop on Items' and select the rows output. Inside the loop, reference the current row with `{{loop.item}}`. If you need more specific help, share a screenshot of your flow.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 18374
+      },
+      "attempts": 1,
+      "elapsed_s": 18.4,
+      "correct": true
+    },
+    {
+      "expected_type": "docs",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/VibeCode",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/VibeCode/issues/new?template=syn-env-docs",
+      "source": "synthetic-edge",
+      "error": "provider_error: Direct openrouter call failed with 503.",
+      "attempts": 1,
+      "correct": false
+    },
+    {
+      "expected_type": "spam",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/symbolgraph",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/symbolgraph/issues/new?template=syn-spam-1",
+      "source": "synthetic-edge",
+      "error": "provider_error: Direct openrouter call failed with 503.",
+      "attempts": 1,
+      "correct": false
+    },
+    {
+      "expected_type": "spam",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/symbolgraph",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/symbolgraph/issues/new?template=syn-empty-1",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/symbolgraph",
+        "issue_type": "spam",
+        "severity": "P3",
+        "confidence": 0.2,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Hi there \u2014 thanks for opening this issue, but it looks like the title and description are empty or gibberish. Could you provide a bit more detail about what you're seeing or what you'd like to discuss? If this was a mistake, feel free to close it or edit it with more context. Happy to help once we know what's going on!",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 8282
+      },
+      "attempts": 1,
+      "elapsed_s": 8.3,
+      "correct": true
+    },
+    {
+      "expected_type": "duplicate",
+      "expected_severity": "P2",
+      "is_duplicate": true,
+      "repo": "Deepjyoti-Sarmah/symbolgraph",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/symbolgraph/issues/new?template=syn-dup-install",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/symbolgraph",
+        "issue_type": "bug",
+        "severity": "P1",
+        "confidence": 0.85,
+        "duplicate_of": null,
+        "labels": [
+          "bug",
+          "install"
+        ],
+        "draft_reply": "Thanks for the extra confirmation. We're seeing the same tree-sitter wheel failure on Python 3.9, and the macOS repro helps narrow it down. Could you share the full `uv sync` output and your `uv`/Python versions? That will help us get a fix out quickly.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 7834
+      },
+      "attempts": 1,
+      "elapsed_s": 7.8,
+      "correct": false
+    }
+  ]
+}

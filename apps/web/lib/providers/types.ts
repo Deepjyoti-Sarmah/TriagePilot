@@ -3,6 +3,9 @@ import type { TriageOutput } from "../schema";
 export type TriageInput = {
   repo: string;
   issue_url: string;
+  /** Inline content (synthetic eval rows). Skips the GitHub fetch when set. */
+  title?: string;
+  body?: string;
 };
 
 export type RunMeta = {

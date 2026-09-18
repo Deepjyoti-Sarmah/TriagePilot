@@ -11,6 +11,9 @@ from ..contracts import TriageOutput
 class TriageInput:
     repo: str
     issue_url: str
+    # Inline content (synthetic eval rows). Skips the GitHub fetch when set.
+    title: str | None = None
+    body: str | None = None
 
 
 @dataclass

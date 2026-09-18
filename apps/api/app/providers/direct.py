@@ -69,6 +69,15 @@ def _extract_json(text: str):
     return None
 
 
+def _issue_context(inp: "TriageInput") -> str:
+    """Inline row content wins (synthetic evals); otherwise fetch GitHub."""
+    if inp.title is not None or inp.body is not None:
+        title = (inp.title or "").strip()
+        body = (inp.body or "").strip()[:3000]
+        return f"Title: {title}\nBody: {body or '(empty)'}"
+    return _github_issue_text(inp.repo, inp.issue_url)
+
+
 def _github_issue_text(repo: str, issue_url: str) -> str:
     """Fetch public title+body so the model classifies content, not URLs.
     Unauthenticated: 60 req/hr. GITHUB_PAT (optional): 5000/hr.
@@ -131,7 +140,7 @@ def make_direct(name: str):
                                {"role": "system", "content": load_prompt(inp.repo)},
                                {"role": "user",
                                 "content": f"Repo: {inp.repo}\nURL: {inp.issue_url}\n"
-                                           f"{_github_issue_text(inp.repo, inp.issue_url)}"},
+                                           f"{_issue_context(inp)}"},
                            ],
                            "temperature": 0.2,
                            "response_format": {"type": "json_object"}},

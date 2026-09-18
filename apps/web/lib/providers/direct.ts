@@ -73,6 +73,18 @@ function holdForHuman(repo: string, reason: string) {
 }
 
 /** Public title+body so the model classifies content, not the URL.
+ *  Inline row content wins (synthetic evals); otherwise fetch GitHub.
+ *  Never fails the run — returns a note when unavailable. */
+async function issueContext(input: TriageInput): Promise<string> {
+  if (input.title !== undefined || input.body !== undefined) {
+    const title = (input.title ?? "").trim();
+    const body = (input.body ?? "").trim().slice(0, 3000);
+    return `Title: ${title}\nBody: ${body || "(empty)"}`;
+  }
+  return githubIssueText(input.issue_url);
+}
+
+/** Public title+body so the model classifies content, not the URL.
  *  Never fails the run — returns a note when unavailable. */
 async function githubIssueText(issueUrl: string): Promise<string> {
   const m = issueUrl.match(/github\.com\/([^/]+\/[^/]+)\/(?:issues|pull)\/(\d+)/);
@@ -133,7 +145,7 @@ function makeDirect(name: DirectName): TriageProvider {
               role: "user",
               content:
                 `Repo: ${input.repo}\nURL: ${input.issue_url}\n` +
-                (await githubIssueText(input.issue_url)),
+                (await issueContext(input)),
             },
           ],
           temperature: 0.2,

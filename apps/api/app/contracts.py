@@ -45,6 +45,8 @@ class RunMeta(BaseModel):
 class RunRequest(BaseModel):
     repo: str = Field(min_length=1, max_length=120)
     issue_url: str = Field(min_length=1, max_length=500)
+    title: Optional[str] = Field(default=None, max_length=200)
+    body: Optional[str] = Field(default=None, max_length=4000)
 
 
 class RunResponse(BaseModel):

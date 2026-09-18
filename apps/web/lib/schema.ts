@@ -25,6 +25,8 @@ export type TriageOutput = z.infer<typeof TriageOutput>;
 export const RunAgentInput = z.object({
   repo: z.string().min(1).max(120),
   issue_url: z.string().url().max(500),
+  title: z.string().max(200).optional(),
+  body: z.string().max(4000).optional(),
 });
 
 export const MISSING_CONFIG = {

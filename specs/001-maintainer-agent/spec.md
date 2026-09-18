@@ -37,6 +37,12 @@ Triage any GitHub issue with a ReAct agent (OpenRouter free model + per-repo KB)
   to human review instead of guessing — the guardrail working as
   designed. Artifact `evals/sweep-001.json`. Follow-up: inline
   title/body on synthetic rows, then re-run.
+- Re-sweep 2026-09-19 (same seed, inline content): **0.800 (8/10) → PASS
+  (boundary)**. 2 rows lost to free-pool 503s (excluded, not counted).
+  Remaining misses bound the classify-only path honestly: terse-title PR
+  held as spam (safe), and single-report duplicate undetectable without
+  memory/tools — the full agent's job, not the direct path's.
+  Artifact `evals/sweep-002.json`.
 - Fallback: `gpt-4o` via OpenAI provider if the gate fails twice.
   KB embeddings need an embedding-compatible provider (OpenAI/Google/
   Azure/OpenRouter); confirm OpenRouter embeddings or keep one OpenAI

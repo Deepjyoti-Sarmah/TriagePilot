@@ -80,7 +80,8 @@ def run_agent(body: dict, req: Request):
         return JSONResponse({"error": e.code, "message": str(e)}, status_code=e.status)
 
     try:
-        res = provider.triage(TriageInput(repo=parsed.repo, issue_url=parsed.issue_url))
+        res = provider.triage(TriageInput(repo=parsed.repo, issue_url=parsed.issue_url,
+                                          title=parsed.title, body=parsed.body))
     except ProviderError as e:
         return JSONResponse(
             {"error": e.code, "message": str(e),

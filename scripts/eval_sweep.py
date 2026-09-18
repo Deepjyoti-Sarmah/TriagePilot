@@ -70,7 +70,8 @@ def run_row(row, pause=10):
         try:
             t0 = time.time()
             res = openrouter_provider.triage(
-                TriageInput(repo=row["repo"], issue_url=row["issue_url"]))
+                TriageInput(repo=row["repo"], issue_url=row["issue_url"],
+                            title=row.get("title"), body=row.get("body")))
             return {"verdict": res.output.model_dump(), "meta": {
                 "provider": res.provider, "model": res.model,
                 "latency_ms": res.latency_ms}, "attempts": attempt + 1,

@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       const upstream = await fetch(`${apiBase}/api/run-agent`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ repo, issue_url }),
+        body: JSON.stringify(parsed.data),
       });
       const data = await upstream.json().catch(() => ({
         error: "provider_error",
@@ -84,7 +84,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { output, meta } = await provider.triage({ repo, issue_url });
+    const { output, meta } = await provider.triage({
+      repo,
+      issue_url,
+      title: parsed.data.title,
+      body: parsed.data.body,
+    });
     const checked = TriageOutput.parse(output);
     return NextResponse.json({
       ...(meta.mode === "mock" ? MISSING_CONFIG : {}),
