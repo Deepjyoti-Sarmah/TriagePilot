@@ -27,7 +27,7 @@ specs:
       - flows/webhook-github-intake.json
       - flows/daily-digest.json
       - flows/mcp-maintainer-entry.json
-    notes: "live 2026-09-19: mcp-maintainer-entry + webhook-github-intake + daily-digest built/published via public API (scripts/cloud/build_flows.py), real exports committed, live /sync verifies bug/P1 on #15626 and #15616; see live-verification.json. Blocked: digest Slack post + MCP trigger (403 API)."
+    notes: "live 2026-09-19: 4 flows built/published via public API (scripts/cloud/build_flows.py): mcp-maintainer-entry, webhook-github-intake, daily-digest, mcp-tool-triage (MCP Tool trigger, toolName triage_github_issue). Real exports committed; /sync verifies bug/P1 on #15626/#15616. Blocked: digest Slack post; MCP server config + client connect are UI/OAuth."
   004-web-ui:
     status: in_progress
     files:

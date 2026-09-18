@@ -16,6 +16,11 @@ Start here: `PLAN.md` → `specs/README.md` → `specs/001-maintainer-agent/spec
   `bug / P1 / conf 0.95` with tools `[github.get_issue, openrouter.chat]`.
 - **Second flow:** `webhook-github-intake` accepts GitHub `issues` events and
   normalizes them before the same triage step. Live: #15616 → `bug / P1`.
+- **Third flow:** `daily-digest` — `every_day` schedule + digest Code step.
+- **MCP tool flow:** `mcp-tool-triage` publishes the triage as an MCP tool
+  `triage_github_issue` (piece `@activepieces/piece-mcp`, *Wait for
+  Response* + *Reply to MCP Client*). Connect a client to
+  `https://cloud.activepieces.com/mcp` (OAuth) and it shows up as a tool.
 - **Backend switch:** set `AP_FLOW_WEBHOOK_URL` and the `activepieces`
   provider routes through the live flow; without it the app falls back to the
   keyless mock. Live verdict through FastAPI verified end-to-end.
@@ -24,10 +29,12 @@ Start here: `PLAN.md` → `specs/README.md` → `specs/001-maintainer-agent/spec
   Cloud project **Variables** and are referenced as `{{variables.*}}`; the
   committed exports never contain values.
 
-Still UI-only (public API refuses): the Cloud **Agent** entity
-(`GET /v1/agents` → 402 `FEATURE_DISABLED`) and the MCP server routes
-(→ 403). `scripts/cloud/build_flows.py` documents this and uses flow
-webhooks as the firewall-friendly path instead.
+API limits found: flows/variables and flow trigger/action edits are fully
+scriptable; `GET /v1/agents` → **402 `FEATURE_DISABLED`** and the MCP
+server *config* routes → **403**. So the Cloud **Agent entity** must be
+created in the UI (see `specs/003-flows/live-verification.json`), while the
+**MCP Tool trigger is a piece trigger and is scriptable** — that is what
+`mcp-tool-triage` uses.
 
 ## Quickstart
 

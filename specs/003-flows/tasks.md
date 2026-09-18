@@ -22,9 +22,15 @@
       `flows/daily-digest.json`.
 - [ ] `daily-digest` posts to the test channel — blocked: needs a
       Slack/Discord webhook secret + UI connection.
-- [ ] `mcp-maintainer-entry` MCP Trigger added — blocked: MCP-server routes
-      return 403 for API keys (UI/OAuth only, verified). The webhook trigger
-      is the backend's programmatic path (`AP_FLOW_WEBHOOK_URL`).
+- [x] MCP Tool trigger added as a sibling flow `mcp-tool-triage` (piece
+      `@activepieces/piece-mcp` trigger `mcp_tool`, toolName
+      `triage_github_issue`, `Wait for Response` on, reply via
+      `Reply to MCP Client`). Activepieces allows one trigger per flow, so
+      the webhook flow and the MCP flow are separate. Built/published via the
+      same public API; connecting a client is the only remaining UI step.
+      Export: `flows/mcp-tool-triage.json`.
+      Note: the MCP *server config* routes (`/v1/mcp-server`) still return
+      403 for API keys — that part is UI/OAuth only.
 - [ ] Duplicate webhook test: same `repo:issue_id` twice -> single post —
       N/A until a write step exists; the triage flow is idempotent by
       construction (read-only).

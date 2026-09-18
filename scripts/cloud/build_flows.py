@@ -187,6 +187,31 @@ def add_code_step(flow_id: str, parent: str, name: str, js: str,
         raise SystemExit(f"code step failed: {status} {raw[:300]}")
 
 
+def add_mcp_reply_step(flow_id: str, parent: str, response_expr: str) -> None:
+    action = {
+        "name": "reply", "valid": True, "displayName": "Reply to MCP Client",
+        "type": "PIECE",
+        "settings": {
+            "pieceName": "@activepieces/piece-mcp",
+            "pieceVersion": "0.0.21",
+            "actionName": "reply_to_mcp_client",
+            # DynamicProperties prop "response" contains one field also named
+            # "response" (see the piece source), so the value nests once.
+            "input": {"mode": "advanced",
+                      "response": {"response": response_expr},
+                      "respond": "stop"},
+            "propertySettings": {"response": {"type": "MANUAL"}},
+        },
+    }
+    status, _, raw = api("POST", f"/flows/{flow_id}",
+                         {"type": "ADD_ACTION",
+                          "request": {"parentStep": parent,
+                                      "stepLocationRelativeToParent": "AFTER",
+                                      "action": action}})
+    if status not in (200, 201):
+        raise SystemExit(f"mcp reply step failed: {status} {raw[:300]}")
+
+
 def add_return_step(flow_id: str, parent: str, body_expr: str) -> None:
     action = {
         "name": "return_response", "valid": True, "displayName": "Return Response",
@@ -249,7 +274,9 @@ def build(flow_name: str, spec: dict) -> dict:
         "openrouter_key": "{{variables.OPENROUTER_API_KEY}}",
     })
     add_code_step(flow_id, "trigger", "triage", js, step_input)
-    if spec.get("return_response", True):
+    if spec.get("reply") == "mcp":
+        add_mcp_reply_step(flow_id, "triage", "{{triage.output}}")
+    elif spec.get("return_response", True):
         add_return_step(flow_id, "triage", "{{triage.output}}")
     publish(flow_id)
 
@@ -287,6 +314,41 @@ FLOWS = {
                  "GITHUB_PAT": "GITHUB_PAT",
                  "OPENROUTER_API_KEY": "OPENROUTER_API_KEY"},
         "defaults": {"TRIAGE_MODEL": "deepseek/deepseek-v4-flash-0731:free"},
+    },
+    # MCP Tool: same triage code exposed to MCP clients (Claude/Cursor/...)
+    # through the hosted MCP server. One trigger per flow in Activepieces, so
+    # this is a sibling of the webhook flow, not the same flow.
+    "mcp-tool-triage": {
+        "code": "scripts/cloud/mcp_entry_code.js",
+        "vars": {"TRIAGE_MODEL": "TRIAGE_MODEL",
+                 "GITHUB_PAT": "GITHUB_PAT",
+                 "OPENROUTER_API_KEY": "OPENROUTER_API_KEY"},
+        "defaults": {"TRIAGE_MODEL": "deepseek/deepseek-v4-flash-0731:free"},
+        "trigger": {
+            "piece": "@activepieces/piece-mcp", "version": "0.0.21",
+            "name": "mcp_tool",
+            "input": {
+                "toolName": "triage_github_issue",
+                "toolDescription": ("Triage a GitHub issue for a registered repo. "
+                                    "Returns issue_type, severity, confidence, "
+                                    "duplicate_of, labels, draft_reply, needs_human."),
+                "inputSchema": [
+                    {"name": "repo", "type": "Text", "required": True,
+                     "description": "owner/name, one of the 4 seed repos"},
+                    {"name": "issue_url", "type": "Text", "required": True,
+                     "description": "full GitHub issue or PR URL"},
+                ],
+                "returnsResponse": True,
+            },
+        },
+        "step_input": {
+            "payload": "{{trigger.output}}",
+            "model": "{{variables.TRIAGE_MODEL}}",
+            "github_pat": "{{variables.GITHUB_PAT}}",
+            "openrouter_key": "{{variables.OPENROUTER_API_KEY}}",
+        },
+        "reply": "mcp",
+        "return_response": False,
     },
     # Daily digest: schedule trigger + Code step that pulls recent open
     # issues per repo and asks the model to summarize. Slack/Discord post is

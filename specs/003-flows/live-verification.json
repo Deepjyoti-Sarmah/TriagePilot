@@ -1,5 +1,5 @@
 {
-  "captured": "2026-09-19T16:38:50.521109+00:00",
+  "captured": "2026-09-19T17:54:47.112118+00:00",
   "flows": [
     {
       "name": "mcp-maintainer-entry",
@@ -11,6 +11,7 @@
         "return_response (webhook piece)"
       ],
       "status": "ENABLED",
+      "purpose": "backend provider path (AP_FLOW_WEBHOOK_URL)",
       "live_proof": "#15626 -> bug/P1/conf 0.95, tools [github.get_issue, openrouter.chat]"
     },
     {
@@ -33,8 +34,20 @@
         "digest (CODE: GitHub search + OpenRouter summary)"
       ],
       "status": "ENABLED",
-      "live_proof": "scheduled; Slack/Discord post pending a webhook secret"
+      "purpose": "scheduled; Slack/Discord post pending"
+    },
+    {
+      "name": "mcp-tool-triage",
+      "id": "kYiMb7xFiE7zV0Q5Dh6P3",
+      "trigger": "@activepieces/piece-mcp mcp_tool (toolName triage_github_issue, Wait for Response)",
+      "steps": [
+        "triage (CODE, tool-using)",
+        "reply_to_mcp_client (MCP piece)"
+      ],
+      "status": "ENABLED",
+      "purpose": "exposed to MCP clients via the hosted /mcp server",
+      "finish_in_ui": "Settings -> MCP Server: toggle on, Copy URL, connect client (OAuth)"
     }
   ],
-  "notes": "Cloud Agent entity + MCP server remain UI-only: public API returns 402 FEATURE_DISABLED for /v1/agents and 403 for MCP routes. The flows above are the programmatic, firewall-friendly path used by the activepieces provider. Build them with: python3 scripts/cloud/build_flows.py --all"
+  "notes": "Public API maps so far: flows/variables CRUD + trigger/action edits work; /v1/agents -> 402 FEATURE_DISABLED; MCP server config routes -> 403. So the Agent entity is UI-only, but the MCP Tool trigger is a piece trigger and IS scriptable. Build all: python3 scripts/cloud/build_flows.py --all"
 }
