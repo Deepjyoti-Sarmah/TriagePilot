@@ -29,6 +29,14 @@ Triage any GitHub issue with a ReAct agent (OpenRouter free model + per-repo KB)
   en route: (a) direct path sent URL-only context — now fetches public
   title+body via GitHub API; (b) model omits `repo` (routing context) —
   now injected server-side post-validation, both stacks.
+- Live sweep 2026-09-19 (`scripts/eval_sweep.py`, 12 stratified rows):
+  strict accuracy **0.750 (9/12)** vs 0.8 gate → FAIL recorded honestly.
+  Decomposition: **7/7 on resolvable rows** (bugs, piece-request, feature;
+  conf 0.70–0.97); 3 misses are synthetic `issues/new?template=` URLs
+  that 404 on the GitHub API, and the model correctly routed all three
+  to human review instead of guessing — the guardrail working as
+  designed. Artifact `evals/sweep-001.json`. Follow-up: inline
+  title/body on synthetic rows, then re-run.
 - Fallback: `gpt-4o` via OpenAI provider if the gate fails twice.
   KB embeddings need an embedding-compatible provider (OpenAI/Google/
   Azure/OpenRouter); confirm OpenRouter embeddings or keep one OpenAI

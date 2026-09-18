@@ -1,0 +1,335 @@
+{
+  "model": "deepseek/deepseek-v4-flash-0731:free",
+  "provider": "openrouter",
+  "seed": 7,
+  "gate": 0.8,
+  "accuracy": 0.75,
+  "gate_pass": false,
+  "scored": 12,
+  "total": 12,
+  "rows": [
+    {
+      "expected_type": "bug",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15587",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P1",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [
+          "bug"
+        ],
+        "draft_reply": "Thanks for the detailed report and root cause analysis. The missing SSH timeout and unguarded cleanup are real issues, and the generic error handling makes this hard to diagnose. We'll look into adding `BatchMode`/`ConnectTimeout` to the SSH command and making the temp/key cleanup resilient so the original error is preserved. Appreciate the reproduction details.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 14489
+      },
+      "attempts": 1,
+      "elapsed_s": 14.5,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P0",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15616",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P1",
+        "confidence": 0.97,
+        "duplicate_of": null,
+        "labels": [
+          "bug"
+        ],
+        "draft_reply": "Thanks for the detailed report and root-cause analysis. We agree this is a real bug in sandbox process cleanup and telemetry. We'll prioritize a fix; tini and the /proc-based process tree look like the right direction. In the meantime, the shareProcessNamespace workaround is a good mitigation.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 12609
+      },
+      "attempts": 1,
+      "elapsed_s": 12.6,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P2",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15627",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P2",
+        "confidence": 0.8,
+        "duplicate_of": null,
+        "labels": [
+          "bug",
+          "pricing",
+          "documentation"
+        ],
+        "draft_reply": "Thanks for the detailed report! We're looking into why \"Chat to automation\" isn't showing up in the Cloud editor despite being listed on the pricing page. Could you confirm your account region and whether you're on the latest browser? In the meantime, we'll check if this is a rollout/feature-flag issue or a docs/pricing mismatch.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 18767
+      },
+      "attempts": 1,
+      "elapsed_s": 18.8,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P2",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15621",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P2",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Thanks for the detailed report! The corrupted Draft Form URL in de/fr/nl/ru is caused by Crowdin sync altering the code fence and query param. We'll correct the strings in Crowdin, bump piece-forms, and add a regression test to keep the `text` block and `useDraft` query stable. Appreciate the root-cause analysis and reproduction steps!",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 54353
+      },
+      "attempts": 1,
+      "elapsed_s": 54.4,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P1",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15623",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P1",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Thanks for the detailed report and root-cause analysis! The 500 on Use Template / Import flow is a clear regression from #15236 \u2014 the empty `flowId` in template migration hits the new `findOneByOrFail` fallback. The proposed `findOneBy` change with a regression test looks right, and the follow-up to clean up orphaned flows on failure is a good catch. Would you like to open a PR with the fix?",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 11185
+      },
+      "attempts": 1,
+      "elapsed_s": 11.2,
+      "correct": true
+    },
+    {
+      "expected_type": "piece-request",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15596",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "piece-request",
+        "severity": "P3",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [
+          "feature-request",
+          "pieces"
+        ],
+        "draft_reply": "Thanks for the detailed proposal! Adding Entra ID service principal auth to the Microsoft SQL Server piece makes sense and the suggested mapping to tedious options looks solid. We'll review this and consider it for an upcoming release. Contributions are welcome if you'd like to submit a PR.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 17020
+      },
+      "attempts": 1,
+      "elapsed_s": 17.0,
+      "correct": true
+    },
+    {
+      "expected_type": "feature",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/VibeCode",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/VibeCode/pull/9",
+      "source": "github",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/VibeCode",
+        "issue_type": "feature",
+        "severity": "P3",
+        "confidence": 0.7,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Thanks for the contribution! Could you add a short description of the agent memory implementation and how the response/fragment generator works? That would help reviewers understand the changes. Also, consider including tests if you haven't already.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 37994
+      },
+      "attempts": 1,
+      "elapsed_s": 38.0,
+      "correct": true
+    },
+    {
+      "expected_type": "question",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/new?template=syn-question-1",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "spam",
+        "severity": "P3",
+        "confidence": 0.1,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Hi there,\n\nIt looks like this issue is missing a description or was submitted without content. Could you please provide more details about the problem or question you're facing? That way we can help you better.\n\nThanks!",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 26021
+      },
+      "attempts": 1,
+      "elapsed_s": 26.0,
+      "correct": false
+    },
+    {
+      "expected_type": "docs",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/VibeCode",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/VibeCode/issues/new?template=syn-env-docs",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/VibeCode",
+        "issue_type": "spam",
+        "severity": "P3",
+        "confidence": 0.1,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Hi there! It looks like your issue is missing a description.\nPlease provide more details about the problem or request so we can assist you.\nThanks for reaching out!",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 21306
+      },
+      "attempts": 1,
+      "elapsed_s": 21.3,
+      "correct": false
+    },
+    {
+      "expected_type": "spam",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/symbolgraph",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/symbolgraph/issues/new?template=syn-spam-1",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/symbolgraph",
+        "issue_type": "spam",
+        "severity": "P3",
+        "confidence": 0.2,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "This appears to be a spam template rather than a real issue. Please provide a clear description of the problem or request. If this is a mistake, feel free to reopen with more details.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 10573
+      },
+      "attempts": 1,
+      "elapsed_s": 10.6,
+      "correct": true
+    },
+    {
+      "expected_type": "spam",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/symbolgraph",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/symbolgraph/issues/new?template=syn-empty-1",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/symbolgraph",
+        "issue_type": "spam",
+        "severity": "P3",
+        "confidence": 0.2,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Hi there! It looks like this issue didn't include a description. Could you share a bit more detail about what you're seeing or what you'd like to see in SymbolGraph? That'll help us triage it properly. Thanks!",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 12813
+      },
+      "attempts": 1,
+      "elapsed_s": 12.8,
+      "correct": true
+    },
+    {
+      "expected_type": "duplicate",
+      "expected_severity": "P2",
+      "is_duplicate": true,
+      "repo": "Deepjyoti-Sarmah/symbolgraph",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/symbolgraph/issues/new?template=syn-dup-install",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/symbolgraph",
+        "issue_type": "spam",
+        "severity": "P3",
+        "confidence": 0.1,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Hi there \u2014 thanks for reaching out. It looks like this issue doesn't include a description or request. Could you share more details about what you're seeing or asking about? If this was opened by mistake, feel free to close it. Happy to help once we have a bit more context!",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "openrouter",
+        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "latency_ms": 9759
+      },
+      "attempts": 1,
+      "elapsed_s": 9.8,
+      "correct": false
+    }
+  ]
+}
