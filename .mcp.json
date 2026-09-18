@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "activepieces": {
+      "type": "http",
+      "url": "https://cloud.activepieces.com/mcp"
+    }
+  }
+}
