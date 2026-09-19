@@ -167,9 +167,9 @@ def set_webhook_trigger(flow_id: str) -> None:
 
 
 def add_code_step(flow_id: str, parent: str, name: str, js: str,
-                  step_input: dict) -> None:
+                  step_input: dict, display: str = "Triage (tools)") -> None:
     action = {
-        "name": name, "valid": True, "displayName": "Triage (tools)",
+        "name": name, "valid": True, "displayName": display,
         "type": "CODE",
         "settings": {
             "sourceCode": {"packageJson": json.dumps({"dependencies": {}}), "code": js},
@@ -242,6 +242,41 @@ def add_return_step(flow_id: str, parent: str, body_expr: str) -> None:
 
 # The Tables piece addresses tables by their *externalId*, not the API id.
 RUNS_TABLE_ID = "Z7UuWHC2pfjUGqDRkh0yf"  # --seed-tables recreates it
+
+# issues_memory (externalId + field externalIds from the export endpoint).
+# Recreated 2026-09-20 via REST with real columns; find filters address
+# fields by these externalIds (verified against piece source: lowercase ops).
+MEMORY_TABLE_EXTERNAL_ID = "5Hga2KDppQkw9l7X0o97x"
+MEMORY_FIELD_REPO = {"id": "mXV53g2b6tt5JE57jg30p", "type": "TEXT", "name": "repo"}
+MEMORY_FIELD_GITHUB_ID = {"id": "bNn42oGXxFyX74f7HDmBM", "type": "NUMBER", "name": "github_id"}
+
+
+def add_memory_find_step(flow_id: str) -> None:
+    """Read prior verdicts for this repo from issues_memory (limit 50).
+    The triage Code step matches fingerprint client-side and short-circuits
+    on a hit — no Router branch needed, no LLM call spent."""
+    add_piece_action(
+        flow_id, "normalize", "find_memory", "Find memory (issues_memory)",
+        "@activepieces/piece-tables", "0.5.1", "tables-find-records",
+        {"table_id": MEMORY_TABLE_EXTERNAL_ID, "limit": 50,
+         "filters": {"filters": [
+             {"field": MEMORY_FIELD_REPO, "operator": "eq",
+              "value": "{{normalize.output.repo}}"},
+         ]}},
+        continue_on_failure=True,  # memory is an optimization; never gate triage
+    )
+
+
+def add_memory_write_step(flow_id: str, parent: str) -> None:
+    """Persist this verdict to issues_memory. The triage Code step emits
+    memory_records: [] on a cache hit, so the write is a no-op then."""
+    add_piece_action(
+        flow_id, parent, "write_memory", "Write memory (issues_memory)",
+        "@activepieces/piece-tables", "0.5.1", "tables-create-records",
+        {"table_id": MEMORY_TABLE_EXTERNAL_ID, "values": {},
+         "records": "{{triage.output.memory_records}}"},
+        continue_on_failure=True,
+    )
 RUNS_FIELDS = [
     {"name": "run_id", "type": "TEXT"},
     {"name": "created_at", "type": "DATETIME"},
@@ -385,13 +420,24 @@ def build(flow_name: str, spec: dict) -> dict:
     js = (ROOT / spec["code"]).read_text()
     # Context v2 path syntax: step references expose {output: ...}; the raw
     # webhook request is at trigger.output.body (verified live 2026-09-19).
+    parent = "trigger"
+    if spec.get("memory"):
+        njs = (ROOT / "scripts/cloud/normalize_code.js").read_text()
+        add_code_step(flow_id, "trigger", "normalize", njs,
+                      {"payload": (spec.get("step_input") or {}).get(
+                          "payload", "{{trigger.output.body}}")},
+                      display="Normalize input")
+        add_memory_find_step(flow_id)
+        parent = "find_memory"
     step_input = spec.get("step_input", {
         "payload": "{{trigger.output.body}}",
         "model": "{{variables.TRIAGE_MODEL}}",
         "github_pat": "{{variables.GITHUB_PAT}}",
         "openrouter_key": "{{variables.OPENROUTER_API_KEY}}",
     })
-    add_code_step(flow_id, "trigger", "triage", js, step_input)
+    if spec.get("memory"):
+        step_input = {**step_input, "memory": "{{find_memory.output}}"}
+    add_code_step(flow_id, parent, "triage", js, step_input)
     last = "triage"
     if spec.get("reply") == "mcp":
         add_mcp_reply_step(flow_id, "triage", "{{triage.output}}")
@@ -401,6 +447,9 @@ def build(flow_name: str, spec: dict) -> dict:
         last = "return_response"
     if spec.get("log_to_tables"):
         add_tables_log_step(flow_id, last)
+        last = "log_run"
+    if spec.get("memory"):
+        add_memory_write_step(flow_id, last)
     publish(flow_id)
 
     status, flow, raw = api("GET", f"/flows/{flow_id}")
@@ -429,6 +478,7 @@ FLOWS = {
                  "OPENROUTER_API_KEY": "OPENROUTER_API_KEY"},
         "defaults": {"TRIAGE_MODEL": "nvidia/nemotron-3-super-120b-a12b:free"},
         "log_to_tables": True,
+        "memory": True,
     },
     # Same tool-using triage code; the Code step also normalizes GitHub
     # "issues" event payloads, so this is the issues.opened intake path.
@@ -439,6 +489,7 @@ FLOWS = {
                  "OPENROUTER_API_KEY": "OPENROUTER_API_KEY"},
         "defaults": {"TRIAGE_MODEL": "nvidia/nemotron-3-super-120b-a12b:free"},
         "log_to_tables": True,
+        "memory": True,
     },
     # MCP Tool: same triage code exposed to MCP clients (Claude/Cursor/...)
     # through the hosted MCP server. One trigger per flow in Activepieces, so
@@ -475,6 +526,7 @@ FLOWS = {
         "reply": "mcp",
         "return_response": False,
         "log_to_tables": True,
+        "memory": True,
     },
     # Daily digest: schedule trigger + Code step that pulls recent open
     # issues per repo and asks the model to summarize. Slack/Discord post is

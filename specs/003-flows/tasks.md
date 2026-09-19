@@ -37,10 +37,17 @@
       Export: `flows/mcp-tool-triage.json`.
       Note: the MCP *server config* routes (`/v1/mcp-server`) still return
       403 for API keys — that part is UI/OAuth only.
-- [ ] Duplicate webhook test: same `repo:issue_id` twice -> single external
-      post — the flow makes no GitHub/Slack write, so there is nothing to
-      double-post; it does append one audit row per call to `runs` (expected
-      for a log). Full idempotency would need a find-record + branch step.
+- [x] Persistent memory live 2026-09-20: `issues_memory` recreated with real
+      columns; all 3 triage flows run trigger -> normalize -> find_memory
+      (`tables-find-records`, repo filter) -> triage -> return -> log_run ->
+      write_memory. Triage Code short-circuits on fingerprint hit (no LLM
+      call, `tools_used: memory-hit`); miss writes the verdict row.
+      Proven live: #15609 miss (bug/P2, 14s LLM) then hit (bug/P2, 0-1ms,
+      identical verdict). Bugs fixed en route: TDZ on `ref`, cached
+      reconstruction now reads row columns (blob carries the rest).
+- [x] Duplicate webhook test: same `repo:issue_id` twice -> second call is a
+      memory hit (no re-classify, no double LLM spend); both calls still
+      append one audit row each to `runs` (correct for a log).
 
 ## Verified building blocks (2026-09-19, live API)
 

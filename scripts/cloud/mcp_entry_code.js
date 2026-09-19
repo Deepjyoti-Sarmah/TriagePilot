@@ -105,13 +105,84 @@ export const code = async (inputs) => {
       "https://github.com/" + repo + "/issues/" + asString(p.issue.number);
   }
   if (!REPOS[repo]) {
-    return { status: "error", code: "unknown_repo", message: "Repo not in registry: " + repo, meta: { provider: "activepieces", model, mode: "live-agent", latency_ms: Date.now() - t0 } };
+    return { status: "error", code: "unknown_repo", message: "Repo not in registry: " + repo, memory_records: [], meta: { provider: "activepieces", model, mode: "live-agent", latency_ms: Date.now() - t0 } };
+  }
+  let ref = parseRef(issueUrl);
+
+  // Memory read (issues_memory via the find_memory Tables step). Rows arrive
+  // in engine shapes ({cells:{...}} or flat); match fingerprint repo#number.
+  // On a hit the cached verdict returns with NO LLM call (tools_used marks it).
+  const fp = ref ? repo + "#" + ref.number : "";
+  let memRows = inputs.memory;
+  if (memRows && typeof memRows === "object" && !Array.isArray(memRows)) {
+    memRows = memRows.records || memRows.data || memRows.rows || [];
+  }
+  if (!Array.isArray(memRows)) memRows = [];
+  const cellVal = (row, names) => {
+    const src = row.cells || row.values || row;
+    if (src == null || typeof src !== "object") return undefined;
+    for (const k of Object.keys(src)) {
+      const v = src[k];
+      const name = (v && typeof v === "object" && v.fieldName) ? v.fieldName : k;
+      if (names.includes(name)) return (v && typeof v === "object" && "value" in v) ? v.value : v;
+    }
+    return undefined;
+  };
+  let memHit = null;
+  if (fp) {
+    for (const row of memRows) {
+      const rRepo = asString(cellVal(row, ["repo"]));
+      const rNum = Number(cellVal(row, ["github_id"]));
+      const rFp = asString(cellVal(row, ["fingerprint"]));
+      if ((rFp && rFp === fp) || (rRepo === repo && ref && rNum === ref.number)) {
+        memHit = row;
+        break;
+      }
+    }
+  }
+  const metaBase = () => ({
+    provider: "activepieces", model, mode: "live-agent",
+    latency_ms: Date.now() - t0, memory_rows_seen: memRows.length,
+  });
+  if (memHit) {
+    let cached = null;
+    try { cached = JSON.parse(asString(cellVal(memHit, ["resolution"]))); } catch (_) { cached = null; }
+    cached = cached && typeof cached === "object" ? cached : {};
+    // Verdict fields live in row COLUMNS; the resolution blob carries the rest.
+    // (Older rows may only have the blob — read both, columns win.)
+    const colType = asString(cellVal(memHit, ["issue_type"]));
+    const colSev = asString(cellVal(memHit, ["severity"]));
+    const type = TYPE_ENUM.includes(colType) ? colType
+      : (TYPE_ENUM.includes(cached.issue_type) ? cached.issue_type : "question");
+    const severity = SEV_ENUM.includes(colSev) ? colSev
+      : (SEV_ENUM.includes(cached.severity) ? cached.severity : "P3");
+    const output = {
+      repo,
+      issue_type: type,
+      severity,
+      confidence: clamp(Number(cached.confidence) || 0, 0, 1),
+      duplicate_of: null,
+      labels: Array.isArray(cached.labels) ? cached.labels.map(asString).filter(Boolean).slice(0, 6) : [],
+      draft_reply: asString(cached.draft_reply).slice(0, 2000) || "Cached verdict — see memory.",
+      needs_human: Boolean(cached.needs_human),
+    };
+    const record = [{
+      run_id: "ap-" + t0, created_at: new Date(t0).toISOString(), repo, input_url: issueUrl,
+      issue_type: output.issue_type, severity: output.severity, confidence: output.confidence,
+      duplicate_of: output.duplicate_of, needs_human: output.needs_human ? "true" : "false",
+      labels: output.labels.join(", "), provider: "activepieces", model, mode: "live-agent",
+      latency_ms: Date.now() - t0, tools_used: "memory-hit", approved_by: "",
+    }];
+    return {
+      output, memory_records: [],
+      meta: { ...metaBase(), tools_used: ["memory-hit"] },
+      record,
+    };
   }
 
   // Inline content (synthetic evals) wins over GitHub fetch.
   let context;
   let candidates = [];
-  let ref = parseRef(issueUrl);
   const hasInlineTitle = p.title != null && String(p.title).trim() !== "";
   const hasInlineBody = p.body != null && String(p.body).trim() !== "";
   if (hasInlineTitle || hasInlineBody) {
@@ -119,7 +190,7 @@ export const code = async (inputs) => {
   } else if (ref) {
     const issue = await fetchIssue(ref.repoPath, ref.number);
     if (issue.status !== 200) {
-      return { output: hold(repo, "GitHub API returned " + issue.status), meta: { provider: "activepieces", model, mode: "live-agent", latency_ms: Date.now() - t0, tools_used: ["github.get_issue"] } };
+      return { output: hold(repo, "GitHub API returned " + issue.status), memory_records: [], meta: { provider: "activepieces", model, mode: "live-agent", latency_ms: Date.now() - t0, tools_used: ["github.get_issue"] } };
     }
     toolsUsed.push("github.get_issue");
     context = "Title: " + issue.title + "\nBody: " + (issue.body || "(empty)") +
@@ -154,6 +225,7 @@ export const code = async (inputs) => {
 
   let output;
   let usedModel = model;
+  let held = false;
   // Free pools rotate (a model can flip to paid overnight). Try the requested
   // model, then known-good free fallbacks, before holding for a human.
   const MODELS = [inputs.model,
@@ -219,6 +291,7 @@ export const code = async (inputs) => {
     }
     if (!output) throw new Error(lastErr);
   } catch (e) {
+    held = true;
     output = hold(repo, String(e && e.message ? e.message : e));
   }
 
@@ -243,8 +316,27 @@ export const code = async (inputs) => {
     approved_by: "",
   }];
 
+  // Memory write row (issues_memory). Empty on hold paths so a failure
+  // never poisons memory; the write step no-ops on [].
+  const memory_records = (ref && !held) ? [{
+    repo,
+    github_id: ref.number,
+    fingerprint: repo + "#" + ref.number,
+    issue_type: output.issue_type,
+    severity: output.severity,
+    resolution: JSON.stringify({
+      issue_type: output.issue_type,
+      severity: output.severity,
+      confidence: output.confidence,
+      labels: output.labels || [],
+      draft_reply: output.draft_reply,
+      needs_human: output.needs_human,
+    }),
+  }] : [];
+
   return {
     output,
+    memory_records,
     meta: {
       provider: "activepieces",
       model: usedModel,

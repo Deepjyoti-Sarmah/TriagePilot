@@ -18,7 +18,7 @@ specs:
       - specs/002-multi-repo/contracts/repos.yaml
       - tables/schema.sql
       - knowledge/SOURCES.md
-    notes: "4 seed repos synced; unknown-repo guardrail proven live (live-negative-001.json); runs table now has full cost/audit fields and receives one row per triage. Memory/KB isolation still needs Cloud UI uploads."
+    notes: "4 seed repos synced; unknown-repo guardrail proven live (live-negative-001.json); runs table now has full cost/audit fields and receives one row per triage. Memory live 2026-09-20: issues_memory has real columns, repo-filtered reads, cross-repo isolation proven (VibeCode PR#9). KB doc uploads still UI."
   003-flows:
     status: in_progress
     files:
@@ -27,7 +27,7 @@ specs:
       - flows/webhook-github-intake.json
       - flows/daily-digest.json
       - flows/mcp-maintainer-entry.json
-    notes: "live 2026-09-20: 4 flows built/published via public API (scripts/cloud/build_flows.py): mcp-maintainer-entry, webhook-github-intake, daily-digest, mcp-tool-triage (MCP Tool trigger triage_github_issue). Triage flows log a row to the Cloud runs table after responding. Blocked: digest Slack post; MCP server config + client connect are UI/OAuth."
+    notes: "live 2026-09-20: 4 flows built/published via public API (scripts/cloud/build_flows.py): mcp-maintainer-entry, webhook-github-intake, daily-digest, mcp-tool-triage (MCP Tool trigger triage_github_issue). Triage flows log a row to the Cloud runs table after responding. Memory live: normalize->find->triage->return->log->write_memory on all 3 triage flows; miss(14s LLM)/hit(0ms cached) + isolation proven. Blocked: digest Slack post; MCP server config + client connect are UI/OAuth."
   004-web-ui:
     status: in_progress
     files:

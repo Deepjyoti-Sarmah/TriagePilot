@@ -12,6 +12,8 @@
 - [x] Memory/audit logging: every triage run appends one row to the Cloud
       `runs` table (repo, issue, verdict, provider, model, mode, latency,
       tools_used) and `/runs` reads it live
-- [ ] Memory isolation test: VibeCode issue never returns Activepieces memory
+- [x] Memory isolation proven live 2026-09-20: VibeCode PR#9 triaged via full
+      LLM path (feature/P3, no memory hit) despite AP rows in the table —
+      the repo-column filter holds.
       (1 proof run) — blocked: needs the per-repo Knowledge Bases uploaded in
       the Cloud UI (the tool-using flow has no memory/KB tool yet)
