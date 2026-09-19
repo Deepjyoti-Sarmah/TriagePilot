@@ -8,8 +8,14 @@ import { TriageForm } from "@/components/triage-form";
 import { VerdictPanel } from "@/components/verdict-panel";
 import { RecentRail } from "@/components/recent-rail";
 
-function TriageConsole({ initialRepo }: { initialRepo: string | null }) {
-  const t = useTriageRun(initialRepo);
+function TriageConsole({
+  initialRepo,
+  initialIssueUrl,
+}: {
+  initialRepo: string | null;
+  initialIssueUrl: string | null;
+}) {
+  const t = useTriageRun(initialRepo, initialIssueUrl);
 
   return (
     <div className="pt-8">
@@ -47,7 +53,12 @@ function TriageConsole({ initialRepo }: { initialRepo: string | null }) {
 
 function WithRepoParam() {
   const params = useSearchParams();
-  return <TriageConsole initialRepo={params.get("repo")} />;
+  const repo = params.get("repo");
+  const issue = params.get("issue"); // "owner/name#number" from featured demos
+  let issueUrl: string | null = null;
+  const m = issue && issue.match(/^([^/]+\/[^/]+)#(\d+)$/);
+  if (m) issueUrl = `https://github.com/${m[1]}/issues/${m[2]}`;
+  return <TriageConsole initialRepo={repo} initialIssueUrl={issueUrl} />;
 }
 
 export default function ChatPage() {

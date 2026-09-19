@@ -1,4 +1,5 @@
 import { Eyebrow, Card, Pill, GhostButton, CodeBlock } from "@/components/ui";
+import { FEATURED, demoUrl } from "@/lib/demo";
 
 const CURL = `curl -X POST $APP/api/run-agent \\
   -H 'Content-Type: application/json' \\
@@ -17,7 +18,7 @@ const SECTORS: Array<[string, string, string]> = [
 
 const STEPS: Array<[string, string]> = [
   ["POST an issue URL", "Any public repo works — no signup, no config. Only the Cloud agent path is scoped to onboarded repos."],
-  ["Agent reasons", "gpt-4o, 12 tool steps: per-repo knowledge base, issues memory, duplicate search, sub-flows, web search."],
+  ["Agent reasons", "12 tool steps on the Cloud path (knowledge base, memory, duplicate search) — or instant classify on the direct path."],
   ["You approve", "Confidence < 0.70, P0 or spam always holds for a human. Drafts post only on your click."],
 ];
 
@@ -25,7 +26,7 @@ export default function Home() {
   return (
     <div className="pt-10">
       <div className="reveal max-w-2xl">
-        <Eyebrow>Maintainer agent console · Activepieces + gpt-4o</Eyebrow>
+        <Eyebrow>Maintainer agent console · any public repo</Eyebrow>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
           Triage for every repo,
           <br />
@@ -52,6 +53,47 @@ export default function Home() {
 
       <div className="reveal mt-6 max-w-2xl" style={{ animationDelay: "90ms" }}>
         <CodeBlock code={CURL} />
+      </div>
+
+      <div className="mt-10">
+        <Eyebrow>Live demos · real open issues</Eyebrow>
+        <p className="mt-2 max-w-2xl text-sm text-zinc-400">
+          One click loads a real open issue into triage. No signup, no config —
+          verdict in seconds.
+        </p>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {FEATURED.map((d) => (
+            <Card key={`${d.repo}#${d.number}`} className="p-4 transition-colors hover:border-zinc-500">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-mono text-xs text-zinc-500">
+                    {d.repo}#{d.number}
+                  </p>
+                  <p className="mt-1 text-[15px] font-medium leading-snug">
+                    {d.title}
+                  </p>
+                  <p className="mt-1 font-mono text-xs text-zinc-500">{d.hint}</p>
+                </div>
+              </div>
+              <div className="mt-3 flex gap-2.5">
+                <a
+                  href={demoUrl(d)}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-lime px-3.5 py-1.5 text-sm font-semibold text-[#0c1005] transition hover:brightness-110"
+                >
+                  Run triage →
+                </a>
+                <a
+                  href={`https://github.com/${d.repo}/issues/${d.number}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center rounded-md border border-line px-3.5 py-1.5 text-sm text-zinc-300 transition hover:border-zinc-500 hover:text-white"
+                >
+                  GitHub ↗
+                </a>
+              </div>
+            </Card>
+          ))}
+        </div>
       </div>
 
       <div className="mt-10 grid gap-3 md:grid-cols-3">

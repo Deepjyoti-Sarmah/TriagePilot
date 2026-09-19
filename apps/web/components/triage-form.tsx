@@ -26,18 +26,20 @@ export function TriageForm({
 }: Props) {
   return (
     <Card className="space-y-4 p-4">
-      <Field label="Repository">
-        <select
+      <Field label="Repository — paste any owner/name">
+        <input
           value={repo}
           onChange={(e) => setRepo(e.target.value)}
-          className={inputCls}
-        >
+          placeholder="facebook/react"
+          list="seed-repos"
+          className={`${inputCls} font-mono text-[13px]`}
+          spellCheck={false}
+        />
+        <datalist id="seed-repos">
           {REPOS.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.id}
-            </option>
+            <option key={r.id} value={r.id} />
           ))}
-        </select>
+        </datalist>
       </Field>
       <Field
         label="Issue URL"

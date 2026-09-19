@@ -6,14 +6,19 @@ import type { Verdict } from "@/lib/triage";
 import { loadRecent, saveRecent, type RecentRun } from "@/lib/history";
 
 /** State machine for one triage run: form state, fetch, shortcuts, history. */
-export function useTriageRun(initialRepo: string | null) {
+export function useTriageRun(
+  initialRepo: string | null,
+  initialIssueUrl: string | null = null
+) {
+  const looksLikeRepo = (r: string | null): r is string =>
+    !!r && /^[^/\s]+\/[^/\s]+$/.test(r);
   const [repo, setRepo] = useState(
-    initialRepo && REPOS.some((r) => r.id === initialRepo)
-      ? initialRepo
-      : REPOS[0].id
+    looksLikeRepo(initialRepo) ? initialRepo : REPOS[0].id
   );
   const [issueUrl, setIssueUrl] = useState(
-    "https://github.com/activepieces/activepieces/issues/15626"
+    initialIssueUrl && initialIssueUrl.startsWith("https://")
+      ? initialIssueUrl
+      : "https://github.com/activepieces/activepieces/issues/15626"
   );
   const [loading, setLoading] = useState(false);
   const [verdict, setVerdict] = useState<Verdict | null>(null);

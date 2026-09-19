@@ -8,7 +8,6 @@ No API keys needed. Everything below runs on this machine.
 python3 scripts/verify.py            # fast gates
 python3 scripts/eval_report.py       # 80 rows, 20 per repo
 ```
-
 ## 1. Boot the console (60s)
 
 ```bash
@@ -16,18 +15,21 @@ cd apps/web && npm install && npm run build && npm run start -- -p 3115
 # open http://localhost:3115
 ```
 
-## 2. File a strip (60s)
+## 2. One-click live demos (90s)
 
-`/chat` → repo `activepieces/activepieces` → paste
-`https://github.com/activepieces/activepieces/issues/15626` → Run.
-Expect `bug / P1 / conf 0.90 / needs human`, draft reply, Approve button.
-Switch to **raw JSON** tab → Copy JSON.
+Landing page → **Live demos** → Run on any card (real open issues from
+Activepieces, Next.js, Bun, TypeScript). Each deep-links into `/chat`
+prefilled — hit Run, get the verdict + raw JSON tab.
+
+Or file manually: `/chat` → any `owner/name` → paste any issue URL → Run.
+No registry, no config: any public repo works on open paths.
 
 ## 3. Break it on purpose (45s)
 
-- Repo `nope/repo` → `unknown_repo` 400, no LLM call.
+- Garbage repo (`nope/repo`) → still triages on open paths (mock heuristics on the URL); the Cloud-agent provider alone rejects non-onboarded repos.
 - Bad URL → `invalid_input` 400.
 - `/repos/new` → type an id, watch the YAML preview, Copy.
+- `/track` → paste any repo → issue list → per-row Triage → titles open on GitHub.
 
 ## 4. Read the log (30s)
 
@@ -43,7 +45,7 @@ against the live GitHub API, rest marked `synthetic-edge`.
 ## 6. One-command proof (60s)
 
 ```bash
-bash scripts/smoke.sh 3210   # web build + boot + 10 asserts, then FastAPI :8000 + 4 asserts
+bash scripts/smoke.sh 3210   # web + FastAPI, 17 asserts, exit 0
 ```
 
 Split-stack manual run:
