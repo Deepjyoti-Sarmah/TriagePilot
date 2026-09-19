@@ -27,7 +27,7 @@ specs:
       - flows/webhook-github-intake.json
       - flows/daily-digest.json
       - flows/mcp-maintainer-entry.json
-    notes: "live 2026-09-20: 4 flows built/published via public API (scripts/cloud/build_flows.py): mcp-maintainer-entry, webhook-github-intake, daily-digest, mcp-tool-triage (MCP Tool trigger triage_github_issue). Triage flows log a row to the Cloud runs table after responding. Memory live: normalize->find->triage->return->log->write_memory on all 3 triage flows; miss(14s LLM)/hit(0ms cached) + isolation proven. Blocked: digest Slack post; MCP server config + client connect are UI/OAuth."
+    notes: "live 2026-09-20: 4 flows built/published via public API (scripts/cloud/build_flows.py). OUTAGE since ~18:43 UTC: runs fail QUOTA_EXCEEDED (chat burned 1k credits), webhooks return {}. Local paths unaffected. Resume on reset/upgrade."
   004-web-ui:
     status: in_progress
     files:

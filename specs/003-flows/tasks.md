@@ -49,6 +49,19 @@
       memory hit (no re-classify, no double LLM spend); both calls still
       append one audit row each to `runs` (correct for a log).
 
+## Cloud outage 2026-09-20 ~18:43 UTC — QUOTA_EXCEEDED on all flow runs
+
+- Cloud Chat burned the 1,000-credit grant in one session (two ~22min
+  loops on expired GitHub/platform connections), then flow runs started
+  failing with status QUOTA_EXCEEDED too. Webhook now returns `{}`.
+- Consequence: Cloud path is DOWN until credits reset (Oct 19) or plan
+  upgrade. Do NOT hammer webhooks meanwhile.
+- Unaffected: local mock + direct-OpenRouter paths (user's own key),
+  `/track` listing, evals, smoke keyless asserts. Demo/dev continues local-first.
+- On reset/upgrade: reconnect GitHub + platform connections (Connections
+  page, OAuth expiry is separate from quota), re-run one webhook triage,
+  confirm SUCCEEDED, resume Cloud verification.
+
 ## Verified building blocks (2026-09-19, live API)
 
 - Tables `repos/issues_memory/runs/digests` created in Cloud (see 002 tasks for ids).
