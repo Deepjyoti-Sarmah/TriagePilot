@@ -9,6 +9,9 @@ Paste a repo URL, see every open issue categorized, click through to GitHub.
 `/chat` triages one pasted issue at a time. Maintainers think in backlogs:
 what's open, what's urgent, what deserves the next click. No view shows that.
 
+New-user rule: paste a repo link and it works. No registry, no
+SOURCES.md, no onboarding — open paths accept any public repo.
+
 ## 3. Non-goals
 
 - No write actions (no labeling/closing from the UI). Read + classify only.

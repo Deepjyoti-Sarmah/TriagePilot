@@ -15,7 +15,10 @@ One-repo demo doesn't prove marketplace value. Each repo has different docs, lab
 
 ## 4. Functional requirements
 
-- FR-1: Given `repo` not in `repos.yaml`, system rejects with `unknown_repo` error (no agent call).
+- FR-1: `repos.yaml` scopes the **Cloud agent only** (memory/KB exist per
+  seed repo). Open paths (mock/direct) accept any public repo — a new user
+  pastes a link and it works, no onboarding. The `activepieces` provider
+  rejects non-onboarded repos itself with `unknown_repo` (no agent call).
 - FR-2: Agent loads `kb_{repo}`, `tone`, `labels allow-list`, `channel` from `repos.yaml` only.
 - FR-3: `issues_memory` queries always filter `repo == input.repo`.
 - FR-4: Adding a repo = 1 YAML row + 1 KB upload + 20 eval rows, no code change.

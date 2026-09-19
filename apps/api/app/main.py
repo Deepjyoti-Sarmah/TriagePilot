@@ -16,7 +16,6 @@ from .contracts import RunMeta, RunRequest, RunResponse
 from .providers.activepieces import ProviderError
 from .providers.base import TriageInput
 from .providers.registry import resolve_provider
-from .repos import KNOWN_REPOS
 
 MISSING_CONFIG = {
     "error": "missing_config",
@@ -136,12 +135,8 @@ def run_agent(body: dict, req: Request):
             {"error": "invalid_input", "details": "issue_url must be a URL."},
             status_code=400,
         )
-    if parsed.repo not in KNOWN_REPOS:
-        return JSONResponse(
-            {"error": "unknown_repo",
-             "message": "Repo not in registry. Known: activepieces/activepieces + 3 seed repos."},
-            status_code=400,
-        )
+    # Open-repo UX (spec 009): any public repo works on open paths.
+    # The activepieces provider enforces the onboarded-repo scope itself.
     try:
         provider = resolve_provider()
     except ProviderError as e:

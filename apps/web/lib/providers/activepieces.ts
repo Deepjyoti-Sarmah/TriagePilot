@@ -1,5 +1,6 @@
 import type { TriageInput, TriageProvider, TriageResult } from "./types";
 import { TriageOutput } from "../schema";
+import { isKnownRepo } from "../repos";
 
 /**
  * Full ReAct agent path: POSTs to the Cloud MCP-entry flow's webhook URL
@@ -16,6 +17,14 @@ export const activepiecesProvider: TriageProvider = {
   model: process.env.TRIAGE_MODEL || "nvidia/nemotron-3-super-120b-a12b:free",
   async triage(input: TriageInput): Promise<TriageResult> {
     const t0 = Date.now();
+    if (!isKnownRepo(input.repo)) {
+      throw Object.assign(
+        new Error(
+          `Repo not onboarded to the Cloud agent (memory/KB cover 4 seed repos). Use mock/openrouter/openai for any public repo.`
+        ),
+        { status: 400, code: "unknown_repo" }
+      );
+    }
     const webhook = (process.env.AP_FLOW_WEBHOOK_URL || "").replace(/\/$/, "");
     if (!webhook) {
       throw Object.assign(

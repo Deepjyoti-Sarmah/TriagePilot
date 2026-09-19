@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { RunAgentInput, TriageOutput, MISSING_CONFIG } from "@/lib/schema";
-import { isKnownRepo } from "@/lib/repos";
 import { resolveProvider } from "@/lib/providers";
 
 // Demo-only in-memory rate limit: 10 req/min/IP. Replace with Redis/Upstash in prod.
@@ -62,15 +61,9 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  if (!isKnownRepo(repo)) {
-    return NextResponse.json(
-      {
-        error: "unknown_repo",
-        message: `Repo not in registry. Known: activepieces/activepieces + 3 seed repos.`,
-      },
-      { status: 400 }
-    );
-  }
+  // New-user rule (spec 009): any public repo works on open paths.
+  // Only the Cloud-agent provider is scoped to onboarded repos
+  // (its memory/KB exist per seed repo) — it rejects the rest itself.
 
   let provider;
   try {

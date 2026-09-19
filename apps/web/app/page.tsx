@@ -16,7 +16,7 @@ const SECTORS: Array<[string, string, string]> = [
 ];
 
 const STEPS: Array<[string, string]> = [
-  ["POST an issue URL", "Repo is validated against the registry before the agent wakes up. Unknown repo → 400, no LLM call."],
+  ["POST an issue URL", "Any public repo works — no signup, no config. Only the Cloud agent path is scoped to onboarded repos."],
   ["Agent reasons", "gpt-4o, 12 tool steps: per-repo knowledge base, issues memory, duplicate search, sub-flows, web search."],
   ["You approve", "Confidence < 0.70, P0 or spam always holds for a human. Drafts post only on your click."],
 ];

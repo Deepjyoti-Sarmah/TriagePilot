@@ -25,10 +25,18 @@ class ProviderError(Exception):
 
 class ActivepiecesProvider:
     name = NAME
-    model = os.environ.get("TRIAGE_MODEL", "nvidia/nemotron-3-super-120b-a12b:free")
+    model = os.environ.get("TRIAGE_MODEL", "qwen/qwen3.8-27b:free")
 
     def triage(self, inp: TriageInput) -> ProviderResult:
+        from ..repos import KNOWN_REPOS
+
         t0 = time.time()
+        if inp.repo not in KNOWN_REPOS:
+            raise ProviderError(
+                "Repo not onboarded to the Cloud agent (memory/KB cover "
+                "4 seed repos). Use mock/openrouter/openai for any public repo.",
+                status=400, code="unknown_repo",
+            )
         webhook = os.environ.get("AP_FLOW_WEBHOOK_URL", "").rstrip("/")
         if not webhook:
             raise ProviderError(

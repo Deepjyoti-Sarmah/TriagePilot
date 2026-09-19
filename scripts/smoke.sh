@@ -74,11 +74,15 @@ assert m.get('provider') == 'mock' and 'latency_ms' in m, d
 print('mock verdict+meta ok:', o['issue_type'], o['severity'], m['provider'])
 " && ok "POST valid → bug/P1 mock + meta" || bad "POST valid → bug/P1 mock + meta" "$resp"
 
-# unknown repo → 400
-code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 -X POST "$BASE/api/run-agent" \
+# open-repo UX (spec 009): any public repo triages on open paths (mock here)
+oresp=$(curl -s --max-time 20 -X POST "$BASE/api/run-agent" \
   -H 'Content-Type: application/json' \
-  -d '{"repo":"nope/repo","issue_url":"https://github.com/x/y/issues/1"}' || echo "000")
-need "POST unknown repo → 400" "400" "$code"
+  -d '{"repo":"octocat/Hello-World","issue_url":"https://github.com/octocat/Hello-World/issues/1"}' || echo '{}')
+echo "$oresp" | python3 -c "
+import json,sys; d=json.load(sys.stdin); o=d.get('output',{})
+assert o.get('issue_type') and o.get('severity'), d
+print('open-repo ok:', o['issue_type'], o['severity'])" \
+  && ok "POST any public repo → 200 verdict" || bad "POST any public repo → 200 verdict" "$oresp"
 
 # invalid input → 400
 code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 -X POST "$BASE/api/run-agent" \
@@ -134,7 +138,7 @@ assert m.get('provider') == 'mock' and 'latency_ms' in m, d
 print('api mock verdict+meta ok:', o['issue_type'], o['severity'], m['provider'])
 " && ok "API valid → bug/P1 mock + meta" || bad "API valid → bug/P1 mock + meta" "$aresp"
 
-for case in "unknown|nope/repo|https://github.com/x/y/issues/1|400" "invalid|activepieces/activepieces|not-a-url|400"; do
+for case in "invalid|activepieces/activepieces|not-a-url|400"; do
   name="${case%%|*}"; rest="${case#*|}"
   r="${rest%%|*}"; rest="${rest#*|}"
   u="${rest%%|*}"; want="${rest##*|}"
@@ -142,6 +146,16 @@ for case in "unknown|nope/repo|https://github.com/x/y/issues/1|400" "invalid|act
     -H 'Content-Type: application/json' -d "{\"repo\":\"$r\",\"issue_url\":\"$u\"}" || echo "000")
   need "API $name → $want" "$want" "$acode"
 done
+
+# open-repo UX (spec 009): any public repo triages on the API too
+aopen=$(curl -s --max-time 20 -X POST "$API_BASE/api/run-agent" \
+  -H 'Content-Type: application/json' \
+  -d '{"repo":"octocat/Hello-World","issue_url":"https://github.com/octocat/Hello-World/issues/1"}' || echo '{}')
+echo "$aopen" | python3 -c "
+import json,sys; d=json.load(sys.stdin); o=d.get('output',{})
+assert o.get('issue_type') and o.get('severity'), d
+print('api open-repo ok:', o['issue_type'], o['severity'])" \
+  && ok "API any public repo → 200 verdict" || bad "API any public repo → 200 verdict" "$aopen"
 
 aresp2=$(curl -s --max-time 20 "$API_BASE/api/repo-issues?repo=activepieces/activepieces&per_page=2" || echo '{}')
 echo "$aresp2" | python3 -c "
