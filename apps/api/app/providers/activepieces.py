@@ -36,23 +36,32 @@ class ActivepiecesProvider:
                 "(flow webhook from spec 003).",
                 status=501, code="not_wired",
             )
-        try:
-            res = httpx.post(
-                webhook,
-                headers={"Content-Type": "application/json"},
-                json={"repo": inp.repo, "issue_url": inp.issue_url,
-                      "model": self.model,
-                      "title": inp.title, "body": inp.body},
-                timeout=90,
-            )
-        except httpx.HTTPError as e:
-            raise ProviderError(f"Flow webhook unreachable: {e}.") from e
-        if res.status_code >= 400:
-            raise ProviderError(f"MCP-entry flow returned {res.status_code}.")
-        try:
-            payload = res.json()
-        except ValueError as e:
-            raise ProviderError("MCP-entry flow returned non-JSON.") from e
+        payload: dict = {}
+        # One retry on empty bodies: cold engine runs occasionally return {}
+        # before the run completes. Bounded to 2 attempts (agent runs cost).
+        for attempt in (1, 2):
+            try:
+                res = httpx.post(
+                    webhook,
+                    headers={"Content-Type": "application/json"},
+                    json={"repo": inp.repo, "issue_url": inp.issue_url,
+                          "model": self.model,
+                          "title": inp.title, "body": inp.body},
+                    timeout=120,
+                )
+            except httpx.HTTPError as e:
+                raise ProviderError(f"Flow webhook unreachable: {e}.") from e
+            if res.status_code >= 400:
+                raise ProviderError(f"MCP-entry flow returned {res.status_code}.")
+            try:
+                payload = res.json()
+            except ValueError as e:
+                raise ProviderError("MCP-entry flow returned non-JSON.") from e
+            if payload.get("output") or (
+                isinstance(payload, dict) and payload.get("issue_type")
+            ):
+                break
+            time.sleep(15)
         try:
             output = TriageOutput.model_validate(payload.get("output", payload))
         except Exception as e:

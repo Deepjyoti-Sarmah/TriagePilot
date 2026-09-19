@@ -23,25 +23,37 @@ export const activepiecesProvider: TriageProvider = {
         { status: 501, code: "not_wired" }
       );
     }
-    const res = await fetch(webhook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        repo: input.repo,
-        issue_url: input.issue_url,
-        model: (this as TriageProvider).model,
-        title: input.title,
-        body: input.body,
-      }),
+    const body = JSON.stringify({
+      repo: input.repo,
+      issue_url: input.issue_url,
+      model: (this as TriageProvider).model,
+      title: input.title,
+      body: input.body,
     });
-    if (!res.ok) {
-      throw Object.assign(
-        new Error(`MCP-entry flow returned ${res.status}.`),
-        { status: 502, code: "provider_error" }
-      );
+    // One retry on empty bodies: cold engine runs occasionally return {}
+    // before the run completes. Bounded to 2 attempts (agent runs cost).
+    let data: unknown = null;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      const res = await fetch(webhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
+      if (!res.ok) {
+        throw Object.assign(
+          new Error(`MCP-entry flow returned ${res.status}.`),
+          { status: 502, code: "provider_error" }
+        );
+      }
+      data = await res.json().catch(() => null);
+      const out = (data as { output?: unknown } | null)?.output ?? data;
+      if (out && Object.keys(out as object).length > 0) break;
+      data = null;
+      if (attempt === 1) await new Promise((r) => setTimeout(r, 15000));
     }
-    const data = await res.json().catch(() => null);
-    const parsed = TriageOutput.safeParse(data?.output ?? data);
+    const parsed = TriageOutput.safeParse(
+      (data as { output?: unknown } | null)?.output ?? data
+    );
     if (!parsed.success) {
       throw Object.assign(
         new Error("Agent returned output outside the contract."),
