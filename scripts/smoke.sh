@@ -54,7 +54,7 @@ need() { # need <desc> <expected> <actual>
   if [ "$2" = "$3" ]; then ok "$1"; else bad "$1" "want $2 got $3"; fi
 }
 
-for p in "" "chat" "runs" "repos/new"; do
+for p in "" "chat" "track" "runs" "repos/new"; do
   code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$BASE/$p" || echo "000")
   need "GET /$p" "200" "$code"
 done
@@ -94,6 +94,17 @@ codes=$(for _ in $(seq 1 14); do
 done)
 if echo "$codes" | grep -q "429"; then ok "rate limit trips (burst → 429)"; else bad "rate limit trips" "$codes"; fi
 
+# repo-issues: 501-not_wired without PAT (CI-safe), or 200-with-shape with PAT.
+# Either is correct — the gate is the contract, not the environment.
+rcode=$(curl -s --max-time 20 "$BASE/api/repo-issues?repo=activepieces/activepieces&per_page=2" || echo '{}')
+echo "$rcode" | python3 -c "
+import json,sys; d=json.load(sys.stdin)
+ok_501 = d.get('error')=='not_wired'
+ok_200 = d.get('repo')=='activepieces/activepieces' and isinstance(d.get('issues'), list)
+assert ok_501 or ok_200, d
+print('repo-issues contract ok:', 'live-shape' if ok_200 else 'not_wired-501')" \
+  && ok "GET repo-issues contract" || bad "GET repo-issues contract" "$rcode"
+
 echo ""
 echo "— python backend (spec 008) —"
 cd "$ROOT_DIR/apps/api"
@@ -131,6 +142,15 @@ for case in "unknown|nope/repo|https://github.com/x/y/issues/1|400" "invalid|act
     -H 'Content-Type: application/json' -d "{\"repo\":\"$r\",\"issue_url\":\"$u\"}" || echo "000")
   need "API $name → $want" "$want" "$acode"
 done
+
+aresp2=$(curl -s --max-time 20 "$API_BASE/api/repo-issues?repo=activepieces/activepieces&per_page=2" || echo '{}')
+echo "$aresp2" | python3 -c "
+import json,sys; d=json.load(sys.stdin)
+ok_501 = d.get('error')=='not_wired'
+ok_200 = d.get('repo')=='activepieces/activepieces' and isinstance(d.get('issues'), list)
+assert ok_501 or ok_200, d
+print('api repo-issues contract ok:', 'live-shape' if ok_200 else 'not_wired-501')" \
+  && ok "API repo-issues contract" || bad "API repo-issues contract" "$aresp2"
 
 echo ""
 echo "$PASS passed, $FAIL failed."

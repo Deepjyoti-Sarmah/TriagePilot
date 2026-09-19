@@ -81,3 +81,12 @@ specs:
       - apps/api/app/providers/direct.py
       - apps/api/app/providers/registry.py
     notes: "strict 23/23 green 2026-09-19: dual smoke 14/14, parity 8/8, files ≤200, proxy path proven live (web→py bug/P1)"
+  009-repo-tracker:
+    status: verified
+    files:
+      - specs/009-repo-tracker/spec.md
+      - specs/009-repo-tracker/tasks.md
+      - apps/api/app/main.py
+      - apps/web/app/api/repo-issues/route.ts
+      - apps/web/app/track/page.tsx
+    notes: "strict 18/18 green: dual repo-issues live-shape, /track 200, smoke 17/17"

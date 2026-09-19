@@ -50,6 +50,7 @@ export default function RootLayout({
               <Clock />
               {[
                 ["Triage", "/chat"],
+                ["Track", "/track"],
                 ["Runs", "/runs"],
                 ["Repos", "/repos/new"],
               ].map(([label, href]) => (

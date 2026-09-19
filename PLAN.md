@@ -46,6 +46,7 @@ MCP Server ON (Discovery + Tables read-only first)
 | 006 keyless hardening | `specs/006-keyless-hardening/` | smoke, sync gates, CI, demo without keys |
 | 007 provider backend | `specs/007-provider-backend/` | env-selected providers, meta on every run |
 | 008 python backend | `specs/008-python-backend/` | FastAPI split, contract parity, dual smoke |
+| 009 repo tracker | `specs/009-repo-tracker/` | repo URL → categorized issue list → click-out |
 | system | `specs/_system/` | how to write a spec + Definition of Done |
 
 Each spec folder has: `spec.md` (what/why) + `tasks.md` (checkboxes) + `contracts/` or `evals/` as needed.

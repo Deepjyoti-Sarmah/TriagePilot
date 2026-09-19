@@ -1,6 +1,7 @@
 """TriagePilot API — standalone Python backend (spec 008).
 Run: uvicorn app.main:app --port 8000  (from apps/api/)
 """
+import os
 import time
 from typing import Optional
 
@@ -47,6 +48,73 @@ def _limited(ip: str) -> bool:
 @app.get("/health")
 def health():
     return {"ok": True, "service": "triagepilot-api"}
+
+
+def _parse_repo(ref: str) -> str | None:
+    """Accept owner/name or any github.com URL containing it."""
+    import re
+
+    ref = (ref or "").strip().strip("/")
+    m = re.search(r"github\.com/([^/]+/[^/]+)", ref)
+    if m:
+        return m.group(1)
+    if re.fullmatch(r"[^/\s]+/[^/\s]+", ref):
+        return ref
+    return None
+
+
+@app.get("/api/repo-issues")
+def repo_issues(repo: str = "", state: str = "open", per_page: int = 15):
+    """List issues for triage tracking (spec 009). PAT-gated like providers."""
+    import httpx
+
+    token = os.environ.get("GITHUB_PAT", "")
+    if not token:
+        return JSONResponse(
+            {"error": "not_wired",
+             "message": "Issue listing needs GITHUB_PAT."},
+            status_code=501,
+        )
+    full = _parse_repo(repo)
+    if not full:
+        return JSONResponse(
+            {"error": "invalid_input",
+             "message": "repo must be owner/name or a github.com repo URL."},
+            status_code=400,
+        )
+    per_page = max(1, min(per_page, 30))
+    try:
+        res = httpx.get(
+            f"https://api.github.com/repos/{full}/issues",
+            params={"state": state if state in ("open", "closed", "all") else "open",
+                    "per_page": per_page, "sort": "updated", "direction": "desc"},
+            headers={"Accept": "application/vnd.github+json",
+                     "Authorization": f"Bearer {token}"},
+            timeout=25,
+        )
+    except httpx.HTTPError as e:
+        return JSONResponse({"error": "provider_error",
+                             "message": f"GitHub unreachable: {e}."},
+                            status_code=502)
+    if res.status_code >= 400:
+        return JSONResponse({"error": "provider_error",
+                             "message": f"GitHub returned {res.status_code}."},
+                            status_code=502)
+    items = []
+    for it in res.json():
+        labels = it.get("labels") or []
+        items.append({
+            "number": it.get("number"),
+            "title": it.get("title") or "",
+            "state": it.get("state") or "",
+            "labels": [l.get("name") if isinstance(l, dict) else str(l)
+                       for l in labels],
+            "updated_at": it.get("updated_at") or "",
+            "html_url": it.get("html_url") or "",
+            "is_pull_request": bool(it.get("pull_request")),
+            "body": (it.get("body") or "")[:1500],
+        })
+    return {"repo": full, "count": len(items), "issues": items}
 
 
 @app.post("/api/run-agent")
