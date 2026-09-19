@@ -13,7 +13,7 @@ import { TriageOutput } from "../schema";
  */
 export const activepiecesProvider: TriageProvider = {
   name: "activepieces",
-  model: process.env.TRIAGE_MODEL || "deepseek/deepseek-v4-flash-0731:free",
+  model: process.env.TRIAGE_MODEL || "nvidia/nemotron-3-super-120b-a12b:free",
   async triage(input: TriageInput): Promise<TriageResult> {
     const t0 = Date.now();
     const webhook = (process.env.AP_FLOW_WEBHOOK_URL || "").replace(/\/$/, "");

@@ -1,0 +1,19 @@
+{
+  "captured": "2026-09-20T12:46:12.516086+00:00",
+  "guardrail": "unknown repo is rejected before any model/tool call (spec 002)",
+  "flow_layers": {
+    "web_backend": "POST /api/run-agent -> 400 unknown_repo (proven in smoke.sh)",
+    "cloud_flow": {
+      "status": "error",
+      "code": "unknown_repo",
+      "message": "Repo not in registry: nope/repo",
+      "meta": {
+        "provider": "activepieces",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "mode": "live-agent",
+        "latency_ms": 0
+      }
+    }
+  },
+  "note": "The backend rejects first; the Cloud flow Code step repeats the check so a direct webhook call also fails closed."
+}

@@ -1,0 +1,356 @@
+{
+  "model": "nvidia/nemotron-3-super-120b-a12b:free",
+  "provider": "activepieces",
+  "seed": 7,
+  "gate": 0.8,
+  "accuracy": 0.833,
+  "gate_pass": true,
+  "scored": 12,
+  "total": 12,
+  "rows": [
+    {
+      "expected_type": "bug",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15587",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P2",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [
+          "\ud83d\udc1b bug",
+          "\ud83c\udfe2 area/management",
+          "\ud83d\udedf support"
+        ],
+        "draft_reply": "Thanks for the detailed report. We\u2019ll add BatchMode and ConnectTimeout to the SSH command and switch the cleanup to fs.rm with force:true to avoid masking the real error. This should surface a clear 400 when outbound port 22 is blocked. We\u2019ll prioritize this for the next release.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "latency_ms": 18295
+      },
+      "attempts": 1,
+      "elapsed_s": 18.3,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P0",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15616",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P0",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [
+          "\ud83d\udc1b bug",
+          "\ud83d\udee0\ufe0f area/infrastructure",
+          "\ud83d\udedf support",
+          "\ud83d\udcab priority"
+        ],
+        "draft_reply": "Thanks for the thorough investigation and clear steps to reproduce. We can confirm this is a critical issue affecting workers in SANDBOX_PROCESS mode.\nThe proposed fix (adding Tini and changing system-usage.ts) looks correct and we'll prioritize merging it.\nWe'll update the issue once the fix is in main and monitor for any regressions.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "latency_ms": 26029
+      },
+      "attempts": 1,
+      "elapsed_s": 26.0,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P2",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15627",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P2",
+        "confidence": 0.85,
+        "duplicate_of": null,
+        "labels": [
+          "bug"
+        ],
+        "draft_reply": "Thanks for reporting this. The \u201cChat to automation\u201d (Build with Chat) feature is currently behind a feature flag and not yet enabled in the Cloud editor. We\u2019re working to roll it out soon and will update the pricing/docs accordingly. Could you confirm if you see any other missing pieces or if this is blocking a specific workflow? We\u2019ll keep you posted on the release timeline.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "latency_ms": 20303
+      },
+      "attempts": 2,
+      "elapsed_s": 20.3,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P2",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15621",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P2",
+        "confidence": 0.9,
+        "duplicate_of": null,
+        "labels": [
+          "\ud83d\udc1b bug",
+          "\ud83e\udde9 area/core-pieces",
+          "\ud83d\udedf support",
+          "\ud83d\udcab priority"
+        ],
+        "draft_reply": "Thanks for the detailed report. We\u2019ll correct the i18n strings in Crowdin for de, fr, nl, ru to use three backticks and the correct query param `useDraft=true`. After the sync PR is merged we\u2019ll bump the piece-forms patch version. To prevent recurrence we\u2019ll move the URL blocks out of the translated strings or mark them as protected segments in Crowdin, and add a regression test ensuring all i18n values keep the proper markdown block.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "latency_ms": 11526
+      },
+      "attempts": 1,
+      "elapsed_s": 11.5,
+      "correct": true
+    },
+    {
+      "expected_type": "bug",
+      "expected_severity": "P1",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15623",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "bug",
+        "severity": "P1",
+        "confidence": 0.95,
+        "duplicate_of": null,
+        "labels": [
+          "bug",
+          "area/flows",
+          "support",
+          "priority"
+        ],
+        "draft_reply": "Thank you for the thorough bug report with clear steps to reproduce and root cause analysis.\nWe have labeled this as a P1 bug in the flows area.\nThe proposed fix in the description looks correct and we will test and merge it soon.\nThanks for helping improve ActivePieces!",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "latency_ms": 27182
+      },
+      "attempts": 1,
+      "elapsed_s": 27.2,
+      "correct": true
+    },
+    {
+      "expected_type": "piece-request",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/15596",
+      "source": "github",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "feature",
+        "severity": "P3",
+        "confidence": 0.9,
+        "duplicate_of": null,
+        "labels": [
+          "\ud83c\udf1f feature",
+          "\ud83e\udde9 area/third-party-pieces",
+          "\ud83d\udedf support"
+        ],
+        "draft_reply": "Thanks for the suggestion! Adding Entra ID (service principal) auth to the Microsoft SQL Server piece would be a valuable improvement. Since the underlying mssql/tedious driver already supports this, we can proceed by adding the new auth fields and lifting the restriction. Please open a draft PR when you\u2019re ready to implement, and we\u2019ll review it. Let us know if you need any help with the piece scaffolding or tests.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "latency_ms": 13235
+      },
+      "attempts": 1,
+      "elapsed_s": 13.2,
+      "correct": false
+    },
+    {
+      "expected_type": "feature",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/VibeCode",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/VibeCode/pull/9",
+      "source": "github",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/VibeCode",
+        "issue_type": "feature",
+        "severity": "P3",
+        "confidence": 0.88,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Thanks for the PR! The addition of agent memory, response, and fragment generator looks exciting. Could you please add a brief description of the changes in the PR description and include any relevant tests? Once that's done, we'll be ready to review and merge.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "latency_ms": 10991
+      },
+      "attempts": 1,
+      "elapsed_s": 11.0,
+      "correct": true
+    },
+    {
+      "expected_type": "question",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "activepieces/activepieces",
+      "issue_url": "https://github.com/activepieces/activepieces/issues/new?template=syn-question-1",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "activepieces/activepieces",
+        "issue_type": "question",
+        "severity": "P3",
+        "confidence": 0.92,
+        "duplicate_of": null,
+        "labels": [
+          "question"
+        ],
+        "draft_reply": "You can loop over Google Sheets rows using the Google Sheets piece combined with a For Each loop.\n\n1. Add the \"List Rows\" action from the Google Sheets piece to fetch the rows you want to iterate.\n2. Connect the output of \"List Rows\" to a \"For Each\" action.\n3. Inside the loop, use the current item to access each row's fields (e.g., column values).\n\nIf you need more details, check the Google Sheets piece documentation in the repo.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "latency_ms": 17134
+      },
+      "attempts": 1,
+      "elapsed_s": 17.1,
+      "correct": true
+    },
+    {
+      "expected_type": "docs",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/VibeCode",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/VibeCode/issues/new?template=syn-env-docs",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/VibeCode",
+        "issue_type": "docs",
+        "severity": "P3",
+        "confidence": 0.92,
+        "duplicate_of": null,
+        "labels": [
+          "docs"
+        ],
+        "draft_reply": "Thanks for the suggestion! We\u2019ll add a section listing the required environment variables for self\u2011hosting. If you have a specific list in mind, feel free to share it or open a PR when ready. Let us know if you need any clarification.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "latency_ms": 7816
+      },
+      "attempts": 1,
+      "elapsed_s": 7.8,
+      "correct": true
+    },
+    {
+      "expected_type": "spam",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/symbolgraph",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/symbolgraph/issues/new?template=syn-spam-1",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/symbolgraph",
+        "issue_type": "spam",
+        "severity": "P3",
+        "confidence": 0.2,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Thanks for the submission, but this looks like promotional/spam content. We\u2019ll close this issue as it doesn\u2019t relate to the symbolgraph project. If you have a genuine question or contribution, please open a new issue.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "latency_ms": 13245
+      },
+      "attempts": 1,
+      "elapsed_s": 13.2,
+      "correct": true
+    },
+    {
+      "expected_type": "spam",
+      "expected_severity": "P3",
+      "is_duplicate": false,
+      "repo": "Deepjyoti-Sarmah/symbolgraph",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/symbolgraph/issues/new?template=syn-empty-1",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/symbolgraph",
+        "issue_type": "spam",
+        "severity": "P3",
+        "confidence": 0.2,
+        "duplicate_of": null,
+        "labels": [],
+        "draft_reply": "Thanks for the submission.\nThis looks like test or spam content.\nIf you have a genuine issue, please provide a clear description.\nOtherwise we will close this as spam.",
+        "needs_human": true
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "latency_ms": 10991
+      },
+      "attempts": 1,
+      "elapsed_s": 11.0,
+      "correct": true
+    },
+    {
+      "expected_type": "duplicate",
+      "expected_severity": "P2",
+      "is_duplicate": true,
+      "repo": "Deepjyoti-Sarmah/symbolgraph",
+      "issue_url": "https://github.com/Deepjyoti-Sarmah/symbolgraph/issues/new?template=syn-dup-install",
+      "source": "synthetic-edge",
+      "verdict": {
+        "repo": "Deepjyoti-Sarmah/symbolgraph",
+        "issue_type": "bug",
+        "severity": "P2",
+        "confidence": 0.9,
+        "duplicate_of": null,
+        "labels": [
+          "bug",
+          "install"
+        ],
+        "draft_reply": "Thanks for confirming the issue on Python 3.9 and macOS. We\u2019ll investigate the tree\u2011sitter wheel compatibility and work on a fix. In the meantime, you may try installing tree\u2011sitter manually or using a newer Python version if possible. We\u2019ll update this thread as we progress.",
+        "needs_human": false
+      },
+      "meta": {
+        "provider": "activepieces",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "latency_ms": 24713
+      },
+      "attempts": 1,
+      "elapsed_s": 24.7,
+      "correct": false
+    }
+  ]
+}

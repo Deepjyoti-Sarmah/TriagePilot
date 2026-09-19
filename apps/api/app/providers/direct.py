@@ -24,7 +24,7 @@ PRESETS = {
     "openrouter": {
         "base": "https://openrouter.ai/api/v1",
         "key_env": "OPENROUTER_API_KEY",
-        "model": "deepseek/deepseek-v4-flash-0731:free",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
         "headers": {"HTTP-Referer": "https://github.com/Deepjyoti-Sarmah",
                     "X-Title": "TriagePilot"},
     },

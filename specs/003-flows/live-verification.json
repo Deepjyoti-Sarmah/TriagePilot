@@ -1,53 +1,61 @@
 {
-  "captured": "2026-09-19T17:54:47.112118+00:00",
+  "captured": "2026-09-20T12:46:41.249766+00:00",
+  "runs_table": {
+    "id": "lXtUJFNQlOLJN8y9ITzzu",
+    "externalId": "Z7UuWHC2pfjUGqDRkh0yf",
+    "fields": "run_id, created_at, repo, input_url, issue_type, severity, confidence, duplicate_of, needs_human, labels, provider, model, mode, latency_ms, tools_used, approved_by",
+    "created_by": "python3 scripts/cloud/build_flows.py --seed-tables"
+  },
   "flows": [
     {
       "name": "mcp-maintainer-entry",
-      "id": "ZjGEeTfUZAQtXVrASMgIf",
-      "url": "https://cloud.activepieces.com/api/v1/webhooks/ZjGEeTfUZAQtXVrASMgIf/sync",
+      "id": "HiuvK9fJuYvFqzi42DRWq",
+      "url": "https://cloud.activepieces.com/api/v1/webhooks/HiuvK9fJuYvFqzi42DRWq/sync",
       "trigger": "catch_webhook (auth none, /sync returns response)",
       "steps": [
-        "triage (CODE, tool-using)",
-        "return_response (webhook piece)"
+        "triage (CODE, tool-using, model fallback)",
+        "return_response (respond+continue)",
+        "log_run (tables create-records)"
       ],
       "status": "ENABLED",
       "purpose": "backend provider path (AP_FLOW_WEBHOOK_URL)",
-      "live_proof": "#15626 -> bug/P1/conf 0.95, tools [github.get_issue, openrouter.chat]"
+      "live_proof": "#15626 -> bug/P1/conf 0.90 with the current default model"
     },
     {
       "name": "webhook-github-intake",
-      "id": "mvVQKTHZqd4HAlEWD3SyV",
-      "url": "https://cloud.activepieces.com/api/v1/webhooks/mvVQKTHZqd4HAlEWD3SyV/sync",
-      "trigger": "catch_webhook + GitHub issues event normalization in code",
+      "id": "Rbf54SXbQOpbSVdH3aRE5",
+      "url": "https://cloud.activepieces.com/api/v1/webhooks/Rbf54SXbQOpbSVdH3aRE5/sync",
+      "trigger": "catch_webhook + GitHub issues event normalization",
       "steps": [
-        "triage (CODE, tool-using)",
-        "return_response (webhook piece)"
+        "triage (CODE)",
+        "return_response",
+        "log_run"
       ],
       "status": "ENABLED",
       "live_proof": "GitHub issues event for #15616 -> bug/P1"
     },
     {
       "name": "daily-digest",
-      "id": "KQjkJrWUL1W89mFOTT0yn",
+      "id": "qORhvu9pwU7TyJU6CM91T",
       "trigger": "@activepieces/piece-schedule every_day 09:00 Asia/Kolkata",
       "steps": [
         "digest (CODE: GitHub search + OpenRouter summary)"
       ],
       "status": "ENABLED",
-      "purpose": "scheduled; Slack/Discord post pending"
+      "purpose": "scheduled; Slack/Discord post pending a webhook secret"
     },
     {
       "name": "mcp-tool-triage",
-      "id": "kYiMb7xFiE7zV0Q5Dh6P3",
+      "id": "YGUuYaWcOHx82qLtd7tpi",
       "trigger": "@activepieces/piece-mcp mcp_tool (toolName triage_github_issue, Wait for Response)",
       "steps": [
-        "triage (CODE, tool-using)",
-        "reply_to_mcp_client (MCP piece)"
+        "triage (CODE)",
+        "reply_to_mcp_client",
+        "log_run"
       ],
       "status": "ENABLED",
-      "purpose": "exposed to MCP clients via the hosted /mcp server",
       "finish_in_ui": "Settings -> MCP Server: toggle on, Copy URL, connect client (OAuth)"
     }
   ],
-  "notes": "Public API maps so far: flows/variables CRUD + trigger/action edits work; /v1/agents -> 402 FEATURE_DISABLED; MCP server config routes -> 403. So the Agent entity is UI-only, but the MCP Tool trigger is a piece trigger and IS scriptable. Build all: python3 scripts/cloud/build_flows.py --all"
+  "notes": "Public API: flows/variables CRUD + trigger/action edits work, INCLUDING an MCP Tool trigger (it is a piece trigger); /v1/agents -> 402 FEATURE_DISABLED; MCP server config routes -> 403. Rebuild: python3 scripts/cloud/build_flows.py --all"
 }

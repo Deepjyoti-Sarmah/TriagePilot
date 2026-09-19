@@ -1,7 +1,7 @@
 # PLAN — Multi-Repo Maintainer Agent (Activepieces AI Agent)
 
 > Flagship: `activepieces/activepieces` triage. Agent-first, not flow-first.
-> Stack: Activepieces Cloud (Agent + Flows + Tables + KB + MCP) + Vercel Next.js + OpenRouter `deepseek/deepseek-v4-flash-0731:free` ($0).
+> Stack: Activepieces Cloud (Agent + Flows + Tables + KB + MCP) + Vercel Next.js + OpenRouter `nvidia/nemotron-3-super-120b-a12b:free` ($0).
 > Method: spec-driven. Every build step maps to a file in `specs/`. Nothing is "done" until `scripts/verify.py` says so.
 
 ## 1. What we are building (simple)

@@ -18,15 +18,22 @@
   gate 0.8 → PASS**. 1 row hit the Cloud `/sync` 30s ceiling (408,
   excluded); 1 miss is the single-report duplicate → bug (dedupe is the
   flow's hard case; candidates were surfaced but not matched).
+- [x] **Live agent-path re-sweep 2026-09-20** (`sweep-004.json`,
+  `nvidia/nemotron-3-super-120b-a12b:free` + fallback chain, 12/12 scored):
+  **0.833 (10/12) vs gate 0.8 → PASS**. Misses: a piece-request read as
+  feature, and the single-report duplicate → bug (known structural hard case).
 - [x] Live low-confidence guardrail proof: unresolvable issue URL →
   conf 0.4, `needs_human: true` — artifact `live-lowconf-001.json`
 - [x] Inline title/body forwarded through the `activepieces` provider so
   synthetic eval rows never depend on a live GitHub fetch
-- [ ] Live duplicate-webhook / idempotency proof (same `repo:issue_id`
-  twice → single post) — needs a flow with a write step; the triage flow
-  is read-only, so there is nothing to double-post
-- [ ] Cost column present in `runs` (tokens + latency + provider/model) —
-  `tables/schema.sql` has the columns; the Cloud `runs` table still needs
-  its fields created in the UI (public API has no field-create route)
-- [ ] `verify.py --strict` passes — blocked only by the UI-only tasks in
-  001 (Agent entity/MCP) and 004 (Vercel); plain `verify.py` is 80/80
+- [ ] Live duplicate-webhook / idempotency proof for external posts (same
+  `repo:issue_id` twice → single post) — the flow has no GitHub/Slack write
+  to double-post; it logs one audit row per call by design. A stricter
+  idempotency key would need a find-record + branch guard.
+- [x] Cost column present in `runs` (latency + provider/model + mode +
+  tools_used): the Cloud `runs` table was seeded with fields via
+  `build_flows.py --seed-tables`, the triage flows append a row per run, and
+  `/runs` reads it live (`specs/002-multi-repo/tasks.md`)
+- [ ] `verify.py --strict` passes — blocked only by the UI-only tasks
+  (001 Cloud Agent entity, 004 Vercel) and the KB/memory task in 002; plain
+  `verify.py` is 80/80 and CI runs that

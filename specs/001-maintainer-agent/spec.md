@@ -8,27 +8,30 @@ Triage any GitHub issue with a ReAct agent (OpenRouter free model + per-repo KB)
 
 - Provider: **OpenRouter** (first-class in Activepieces since 0.74.0:
   Platform Admin → AI Center → OpenRouter, usable in Agents).
-- Model: **`deepseek/deepseek-v4-flash-0731:free`** — verified live 2026-09-19
-  (real #15626 → bug/P1/conf 0.95). $0 in/out, long context, enough for 12
-  tool steps + KB chunks. The earlier pick `qwen/qwen3.8-27b:free` is the
-  documented fallback; both are env-swappable via `TRIAGE_MODEL`.
+- Model: **`nvidia/nemotron-3-super-120b-a12b:free`** (current default;
+  verified live 2026-09-20: #15626 → bug/P1/conf 0.90 through the Cloud flow).
+  The flow Code step also carries a fallback chain
+  (`nemotron-3-super-120b-a12b:free` → `inclusionai/ling-3.0-flash-vl:free`
+  → `nex-agi/nex-n2.5-pro:free` → `qwen/qwen3.8-27b:free`); either backend is
+  env-swappable via `TRIAGE_MODEL`.
 - Why free-first: evals + demo run at $0; paid fallback only if the
   accuracy gate fails.
 - Known limits: free-tier rate caps (~tens of req/min, daily quotas) → run
   the 80-row eval sweep in small batches; tool-calling is weaker than
   `gpt-4o`, so the **type-accuracy > 0.8 gate stays** and every run logs
   `provider/model` — a miss is a finding, not a surprise.
-- Live finding 2026-09-19: free shared pools throttle hard at times
-  (`qwen3.8-27b:free` and `gemma-4-31b-it:free` both 429
-  `upstream_provider_shared_pool`, key itself valid $0/$5 → switched the
-  default to `deepseek-v4-flash:free`, which returned clean verdicts). Mitigations,
-  in order: (1) retry later in small batches, (2) `TRIAGE_MODEL` to any
-  of the ~25 `:free` models (provider-agnostic by design), (3) $5 credit
-  unlocks paid routing + far higher limits. Direct path hardened anyway:
-  lenient JSON extraction (reasoning traces) + hold-for-human fallback.
-- Live proof 2026-09-19: `deepseek/deepseek-v4-flash-0731:free` triaged
-  real issue #15626 → **bug/P1/conf 0.95**, sensible labels + draft,
-  34s, artifact `evals/sample-run-direct-001.json`. Two real bugs found
+- Live finding: free shared pools churn hard. `qwen3.8-27b:free` 429'd on
+  2026-09-19; its replacement `deepseek-v4-flash:free` returned clean verdicts
+  that day (sweep-003) but flipped to **paid-only** on 2026-09-20
+  (`404 … unavailable for free`), and `gemma-4-31b-it:free` 429s. Default
+  moved to `nvidia/nemotron-3-super-120b-a12b:free`, and the flow now retries a
+  fallback chain each run. Mitigations: (1) fallback chain + retry in small
+  batches, (2) `TRIAGE_MODEL` to any current `:free` model, (3) $5 credit
+  unlocks paid routing. Direct path hardened with lenient JSON extraction +
+  hold-for-human fallback.
+- Live proof 2026-09-19 (`deepseek-v4-flash:free`, now paid): triaged real
+  issue #15626 → **bug/P1/conf 0.95**, sensible labels + draft, artifact
+  `evals/sample-run-direct-001.json`. Two real bugs found
   en route: (a) direct path sent URL-only context — now fetches public
   title+body via GitHub API; (b) model omits `repo` (routing context) —
   now injected server-side post-validation, both stacks.
@@ -46,6 +49,10 @@ Triage any GitHub issue with a ReAct agent (OpenRouter free model + per-repo KB)
   held as spam (safe), and single-report duplicate undetectable without
   memory/tools — the full agent's job, not the direct path's.
   Artifact `evals/sweep-002.json`.
+- **Full agent path (Cloud flow) sweep 2026-09-20: 0.909 (10/11) → PASS**,
+  provider `activepieces`, artifact `evals/sweep-003.json`; re-run on the
+  nemotron default in `evals/sweep-004.json`. Every run logs a row to the
+  Cloud `runs` table (provider/model/latency/tools) which `/runs` reads live.
 - Fallback: `gpt-4o` via OpenAI provider if the gate fails twice.
   KB embeddings need an embedding-compatible provider (OpenAI/Google/
   Azure/OpenRouter); confirm OpenRouter embeddings or keep one OpenAI

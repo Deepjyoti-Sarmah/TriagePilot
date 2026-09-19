@@ -25,7 +25,7 @@ class ProviderError(Exception):
 
 class ActivepiecesProvider:
     name = NAME
-    model = os.environ.get("TRIAGE_MODEL", "deepseek/deepseek-v4-flash-0731:free")
+    model = os.environ.get("TRIAGE_MODEL", "nvidia/nemotron-3-super-120b-a12b:free")
 
     def triage(self, inp: TriageInput) -> ProviderResult:
         t0 = time.time()

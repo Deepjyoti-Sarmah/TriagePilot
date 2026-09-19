@@ -24,7 +24,7 @@ from dotenv import load_dotenv  # noqa: E402
 load_dotenv(ROOT / "apps" / "api" / ".env")
 
 os.environ.setdefault("TRIAGE_PROVIDER", "openrouter")
-os.environ.setdefault("TRIAGE_MODEL", "deepseek/deepseek-v4-flash-0731:free")
+os.environ.setdefault("TRIAGE_MODEL", "nvidia/nemotron-3-super-120b-a12b:free")
 
 from app.providers.registry import resolve_provider  # noqa: E402
 from app.providers.base import TriageInput  # noqa: E402

@@ -1,12 +1,13 @@
 # 003 tasks — Flows
 
-## Live now (programmatic, 2026-09-19)
+## Live now (programmatic, 2026-09-20)
 
 - [x] `mcp-maintainer-entry` built + ENABLED in Cloud via public API
       (`scripts/cloud/build_flows.py`): Catch Webhook trigger (auth none,
       `/sync` returns response) -> Code step (GitHub issue fetch + dedupe
-      search + OpenRouter classify) -> Return Response. Live call returns
-      structured agent JSON (bug/P1/conf 0.95, #15626). Export:
+      search + OpenRouter classify with a free-model fallback chain) ->
+      Return Response (respond-and-continue) -> Tables "Log run". Live call
+      returns structured agent JSON (bug/P1/conf 0.90, #15626). Export:
       `flows/mcp-maintainer-entry.json`.
 - [x] `webhook-github-intake` built + ENABLED; the Code step normalizes
       GitHub `issues` events; tested live with a real issue payload
@@ -16,6 +17,11 @@
       is no write step to gate.
 - [x] Secrets stay in Cloud project Variables (`{{variables.*}}`); the
       committed exports contain references, never values.
+- [x] Every triage run appends one cost/audit row to the Cloud `runs` table
+      via a `@activepieces/piece-tables` "Create Record(s)" step
+      (`continueOnFailure: true`, after the response so it never delays the
+      caller). Fields: repo, issue, verdict, provider, model, mode, latency,
+      tools_used. The `/runs` page reads this table live.
 - [x] `daily-digest` built + ENABLED with an `every_day` schedule trigger
       (09:00 Asia/Kolkata) and a Code step that pulls recent open issues per
       repo and asks the model for a 3-6 bullet digest. Export:
@@ -31,9 +37,10 @@
       Export: `flows/mcp-tool-triage.json`.
       Note: the MCP *server config* routes (`/v1/mcp-server`) still return
       403 for API keys — that part is UI/OAuth only.
-- [ ] Duplicate webhook test: same `repo:issue_id` twice -> single post —
-      N/A until a write step exists; the triage flow is idempotent by
-      construction (read-only).
+- [ ] Duplicate webhook test: same `repo:issue_id` twice -> single external
+      post — the flow makes no GitHub/Slack write, so there is nothing to
+      double-post; it does append one audit row per call to `runs` (expected
+      for a log). Full idempotency would need a find-record + branch step.
 
 ## Verified building blocks (2026-09-19, live API)
 

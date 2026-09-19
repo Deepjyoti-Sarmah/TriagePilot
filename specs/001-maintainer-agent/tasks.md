@@ -15,17 +15,22 @@
 
 ## Live agent path (flow-backed)
 
-- [x] Tool-using triage live: #15626 → **bug/P1/conf 0.95**, tools
-      `[github.get_issue, openrouter.chat]` — artifact
-      `evals/sample-run-001.json`
+- [x] Tool-using triage live: #15626 → **bug/P1/conf 0.90** with the current
+      default model, tools `[github.get_issue, openrouter.chat:<model>]` —
+      artifacts `evals/sample-run-001.json` + `evals/sweep-003.json`
 - [x] Second live run through the same flow for a second repo/issue class
 - [x] Low-confidence guardrail: unresolvable issue URL → conf 0.4,
       `needs_human: true` — artifact
       `../005-evals-guardrails/live-lowconf-001.json`
+- [x] Per-run model fallback chain in the flow (free pools rotate; a model can
+      flip to paid overnight)
+- [x] Every run appends a cost/audit row to the Cloud `runs` table
+      (provider/model/mode/latency/tools_used)
+- [x] MCP Tool trigger published as sibling flow `mcp-tool-triage`
+      (`triage_github_issue`) — scriptable via the public API
 - [ ] Cloud Agent ENTITY created in the UI (provider OpenRouter, model
-      `deepseek/deepseek-v4-flash-0731:free`, `maxSteps: 12`, webSearch on) —
+      `nvidia/nemotron-3-super-120b-a12b:free`, `maxSteps: 12`, webSearch on) —
       blocked: `/v1/agents` → 402 FEATURE_DISABLED via API key
-- [ ] MCP trigger on the flow — blocked: MCP routes → 403 (OAuth/UI only)
 
 ## Evals seed
 

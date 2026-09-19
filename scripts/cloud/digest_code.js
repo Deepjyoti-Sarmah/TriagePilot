@@ -1,6 +1,6 @@
 export const code = async (inputs) => {
   const t0 = Date.now();
-  const model = inputs.model || "deepseek/deepseek-v4-flash-0731:free";
+  const model = inputs.model || "nvidia/nemotron-3-super-120b-a12b:free";
   const ghToken = inputs.github_pat || "";
   const orKey = inputs.openrouter_key || "";
   const REPOS = [

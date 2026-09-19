@@ -1,19 +1,20 @@
 # Activepieces-ai — Multi-Repo Maintainer Agent
 
 AI-agent-first showcase for Activepieces: one ReAct-style agent
-(OpenRouter `deepseek/deepseek-v4-flash-0731:free`, `maxSteps: 12`) triages
+(OpenRouter `nvidia/nemotron-3-super-120b-a12b:free`, `maxSteps: 12`) triages
 GitHub issues for N repos, with human approval before any post.
 Gravity-style demo on Vercel.
 
 Start here: `PLAN.md` → `specs/README.md` → `specs/001-maintainer-agent/spec.md`.
 
-## What is live right now (2026-09-19)
+## What is live right now (2026-09-20)
 
 - **Cloud flow endpoint (real):** `mcp-maintainer-entry` is built, published
   and ENABLED in Activepieces Cloud. A Catch Webhook trigger (`/sync`) runs a
   Code step that fetches the GitHub issue, runs a dedupe search, and calls
-  OpenRouter, then returns the structured verdict. Live: #15626 →
-  `bug / P1 / conf 0.95` with tools `[github.get_issue, openrouter.chat]`.
+  OpenRouter (with a free-model **fallback chain**), then returns the
+  structured verdict and appends a row to the Cloud `runs` table. Live:
+  #15626 → `bug / P1`.
 - **Second flow:** `webhook-github-intake` accepts GitHub `issues` events and
   normalizes them before the same triage step. Live: #15616 → `bug / P1`.
 - **Third flow:** `daily-digest` — `every_day` schedule + digest Code step.
@@ -21,13 +22,16 @@ Start here: `PLAN.md` → `specs/README.md` → `specs/001-maintainer-agent/spec
   `triage_github_issue` (piece `@activepieces/piece-mcp`, *Wait for
   Response* + *Reply to MCP Client*). Connect a client to
   `https://cloud.activepieces.com/mcp` (OAuth) and it shows up as a tool.
+- **Live audit log:** each run writes repo, verdict, provider, model, mode,
+  latency and tools used to the Cloud `runs` table; the web `/runs` page
+  reads it live (no mock banner when `AP_API_KEY` is set).
 - **Backend switch:** set `AP_FLOW_WEBHOOK_URL` and the `activepieces`
   provider routes through the live flow; without it the app falls back to the
-  keyless mock. Live verdict through FastAPI verified end-to-end.
-- Builders: `scripts/cloud/build_flows.py` (publish/exports) and
-  `scripts/cloud/mcp_entry_code.js` (the tool-using step). Secrets live in
-  Cloud project **Variables** and are referenced as `{{variables.*}}`; the
-  committed exports never contain values.
+  keyless mock.
+- Builders: `scripts/cloud/build_flows.py` (publish/exports, plus
+  `--seed-tables`) and `scripts/cloud/mcp_entry_code.js` (the tool-using
+  step). Secrets live in Cloud project **Variables** and are referenced as
+  `{{variables.*}}`; the committed exports never contain values.
 
 API limits found: flows/variables and flow trigger/action edits are fully
 scriptable; `GET /v1/agents` → **402 `FEATURE_DISABLED`** and the MCP
@@ -53,7 +57,9 @@ bash scripts/smoke.sh 3210
 ## Live calls (keys in `apps/api/.env`, git-ignored)
 
 ```bash
+# (re)create the Cloud runs table with its cost/audit fields, then
 # rebuild/publish the Cloud flows and print their URLs
+python3 scripts/cloud/build_flows.py --seed-tables
 python3 scripts/cloud/build_flows.py --all
 
 # run one verdict through the live Cloud flow, via the backend
@@ -63,7 +69,7 @@ curl -s -X POST localhost:8000/api/run-agent -H 'Content-Type: application/json'
   -d '{"repo":"activepieces/activepieces","issue_url":"https://github.com/activepieces/activepieces/issues/15626"}'
 
 # live accuracy sweep through the agent path (spec 005)
-python3 scripts/eval_sweep.py --provider activepieces --n 12 --out sweep-003.json
+python3 scripts/eval_sweep.py --provider activepieces --n 12 --out sweep-004.json
 ```
 
 ## What runs without keys vs what is blocked
@@ -71,10 +77,10 @@ python3 scripts/eval_sweep.py --provider activepieces --n 12 --out sweep-003.jso
 | Runs keyless now | Blocked on Cloud UI / secrets |
 |---|---|
 | `verify.py` structural gates + eval counts | Cloud **Agent entity** + MCP server (UI/OAuth only) |
-| `eval_report.py` 80-row distribution | `daily-digest` Slack post + schedule trigger |
+| `eval_report.py` 80-row distribution | Cloud **Agent entity** creation |
 | Web app in MOCK mode: `/chat /runs /repos/new` | Vercel preview URL |
 | `smoke.sh` full runtime asserts (forced mock) | KB upload/embeddings |
-| 2 live Cloud flows rebuilt from source |  |
+| 4 live Cloud flows rebuilt from source | `daily-digest` Slack/Discord post |
 
 Keyed work starts the day secrets land (`.env.example` lists them).
 Demo path: `DEMO.md`.

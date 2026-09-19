@@ -25,6 +25,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import subprocess
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -197,9 +199,11 @@ def add_mcp_reply_step(flow_id: str, parent: str, response_expr: str) -> None:
             "actionName": "reply_to_mcp_client",
             # DynamicProperties prop "response" contains one field also named
             # "response" (see the piece source), so the value nests once.
+            # "respond" (Respond and Continue) so the run-log step after this
+            # never delays the MCP client.
             "input": {"mode": "advanced",
                       "response": {"response": response_expr},
-                      "respond": "stop"},
+                      "respond": "respond"},
             "propertySettings": {"response": {"type": "MANUAL"}},
         },
     }
@@ -220,7 +224,9 @@ def add_return_step(flow_id: str, parent: str, body_expr: str) -> None:
             "pieceName": "@activepieces/piece-webhook",
             "pieceVersion": "0.1.41",
             "actionName": "return_response",
-            "input": {"responseType": "json", "respond": "stop",
+            # "respond" (Respond and Continue) so the run-log step after this
+            # never delays the HTTP caller (and never trips the 30s /sync cap).
+            "input": {"responseType": "json", "respond": "respond",
                       "fields": {"status": 200, "headers": {}, "body": body_expr}},
             "propertySettings": {},
         },
@@ -232,6 +238,118 @@ def add_return_step(flow_id: str, parent: str, body_expr: str) -> None:
                                       "action": action}})
     if status not in (200, 201):
         raise SystemExit(f"return step failed: {status} {raw[:300]}")
+
+
+# The Tables piece addresses tables by their *externalId*, not the API id.
+RUNS_TABLE_ID = "Z7UuWHC2pfjUGqDRkh0yf"  # --seed-tables recreates it
+RUNS_FIELDS = [
+    {"name": "run_id", "type": "TEXT"},
+    {"name": "created_at", "type": "DATETIME"},
+    {"name": "repo", "type": "TEXT"},
+    {"name": "input_url", "type": "TEXT"},
+    {"name": "issue_type", "type": "TEXT"},
+    {"name": "severity", "type": "TEXT"},
+    {"name": "confidence", "type": "NUMBER"},
+    {"name": "duplicate_of", "type": "NUMBER"},
+    {"name": "needs_human", "type": "TEXT"},
+    {"name": "labels", "type": "TEXT"},
+    {"name": "provider", "type": "TEXT"},
+    {"name": "model", "type": "TEXT"},
+    {"name": "mode", "type": "TEXT"},
+    {"name": "latency_ms", "type": "NUMBER"},
+    {"name": "tools_used", "type": "TEXT"},
+    {"name": "approved_by", "type": "TEXT"},
+]
+
+
+def add_piece_action(flow_id: str, parent: str, name: str, display: str,
+                     piece: str, version: str, action_name: str,
+                     step_input: dict, continue_on_failure: bool = False) -> None:
+    action = {
+        "name": name, "valid": True, "displayName": display, "type": "PIECE",
+        "settings": {
+            "pieceName": piece, "pieceVersion": version,
+            "actionName": action_name, "input": step_input,
+            "propertySettings": {},
+            "errorHandlingOptions": {
+                "continueOnFailure": {"value": continue_on_failure},
+                "retryOnFailure": {"value": False},
+            },
+        },
+    }
+    status, _, raw = api("POST", f"/flows/{flow_id}",
+                         {"type": "ADD_ACTION",
+                          "request": {"parentStep": parent,
+                                      "stepLocationRelativeToParent": "AFTER",
+                                      "action": action}})
+    if status not in (200, 201):
+        raise SystemExit(f"{name} step failed: {status} {raw[:300]}")
+
+
+def seed_runs_table() -> str:
+    """(Re)create the Cloud runs table with the cost/audit columns and return
+    its id. Needed once per project; fields cannot be added through the public
+    API (there is no field-create route)."""
+    pid = os.environ["AP_PROJECT_ID"]
+    status, data, _ = api("GET", f"/tables?projectId={pid}")
+    items = (data.get("data") if isinstance(data, dict) else data) or []
+    for t in items:
+        if t.get("name") == "runs":
+            api("DELETE", f"/tables/{t['id']}")
+    for stale in find_flows("zz-seed-runs"):
+        delete_flow(stale)
+    fid = create_flow("zz-seed-runs")
+    set_webhook_trigger(fid)
+    add_piece_action(fid, "trigger", "seed", "Create runs table",
+                     "@activepieces/piece-tables", "0.5.1",
+                     "tables-create-table", {"name": "runs", "fields": RUNS_FIELDS})
+    publish(fid)
+    subprocess.run(
+        ["curl", "-s", "-m", "60", "-X", "POST",
+         "-H", "Content-Type: application/json", "-d", "{}",
+         f"https://cloud.activepieces.com/api/v1/webhooks/{fid}/sync"],
+        capture_output=True,
+    )
+    time.sleep(2)
+    for stale in find_flows("zz-seed-runs"):
+        delete_flow(stale)
+    status, data, _ = api("GET", f"/tables?projectId={pid}")
+    items = (data.get("data") if isinstance(data, dict) else data) or []
+    for t in items:
+        if t.get("name") == "runs":
+            return t["id"]
+    raise SystemExit("seed failed: runs table not found")
+
+
+def add_tables_log_step(flow_id: str, parent: str,
+                        table_id: str = RUNS_TABLE_ID) -> None:
+    """Append one row to the Cloud runs table. continueOnFailure=True, so a
+    logging problem can never fail a triage run."""
+    action = {
+        "name": "log_run", "valid": True, "displayName": "Log run (runs table)",
+        "type": "PIECE",
+        "settings": {
+            "pieceName": "@activepieces/piece-tables",
+            "pieceVersion": "0.5.1",
+            "actionName": "tables-create-records",
+            # Code step output is {output, meta, record}; step refs wrap it
+            # once, so the record array is triage.output.record.
+            "input": {"table_id": table_id, "values": {},
+                      "records": "{{triage.output.record}}"},
+            "propertySettings": {},
+            "errorHandlingOptions": {
+                "continueOnFailure": {"value": True},
+                "retryOnFailure": {"value": False},
+            },
+        },
+    }
+    status, _, raw = api("POST", f"/flows/{flow_id}",
+                         {"type": "ADD_ACTION",
+                          "request": {"parentStep": parent,
+                                      "stepLocationRelativeToParent": "AFTER",
+                                      "action": action}})
+    if status not in (200, 201):
+        raise SystemExit(f"tables log step failed: {status} {raw[:300]}")
 
 
 def sanitize(obj) -> str:
@@ -274,10 +392,15 @@ def build(flow_name: str, spec: dict) -> dict:
         "openrouter_key": "{{variables.OPENROUTER_API_KEY}}",
     })
     add_code_step(flow_id, "trigger", "triage", js, step_input)
+    last = "triage"
     if spec.get("reply") == "mcp":
         add_mcp_reply_step(flow_id, "triage", "{{triage.output}}")
+        last = "reply"
     elif spec.get("return_response", True):
         add_return_step(flow_id, "triage", "{{triage.output}}")
+        last = "return_response"
+    if spec.get("log_to_tables"):
+        add_tables_log_step(flow_id, last)
     publish(flow_id)
 
     status, flow, raw = api("GET", f"/flows/{flow_id}")
@@ -304,7 +427,8 @@ FLOWS = {
         "vars": {"TRIAGE_MODEL": "TRIAGE_MODEL",
                  "GITHUB_PAT": "GITHUB_PAT",
                  "OPENROUTER_API_KEY": "OPENROUTER_API_KEY"},
-        "defaults": {"TRIAGE_MODEL": "deepseek/deepseek-v4-flash-0731:free"},
+        "defaults": {"TRIAGE_MODEL": "nvidia/nemotron-3-super-120b-a12b:free"},
+        "log_to_tables": True,
     },
     # Same tool-using triage code; the Code step also normalizes GitHub
     # "issues" event payloads, so this is the issues.opened intake path.
@@ -313,7 +437,8 @@ FLOWS = {
         "vars": {"TRIAGE_MODEL": "TRIAGE_MODEL",
                  "GITHUB_PAT": "GITHUB_PAT",
                  "OPENROUTER_API_KEY": "OPENROUTER_API_KEY"},
-        "defaults": {"TRIAGE_MODEL": "deepseek/deepseek-v4-flash-0731:free"},
+        "defaults": {"TRIAGE_MODEL": "nvidia/nemotron-3-super-120b-a12b:free"},
+        "log_to_tables": True,
     },
     # MCP Tool: same triage code exposed to MCP clients (Claude/Cursor/...)
     # through the hosted MCP server. One trigger per flow in Activepieces, so
@@ -323,7 +448,7 @@ FLOWS = {
         "vars": {"TRIAGE_MODEL": "TRIAGE_MODEL",
                  "GITHUB_PAT": "GITHUB_PAT",
                  "OPENROUTER_API_KEY": "OPENROUTER_API_KEY"},
-        "defaults": {"TRIAGE_MODEL": "deepseek/deepseek-v4-flash-0731:free"},
+        "defaults": {"TRIAGE_MODEL": "nvidia/nemotron-3-super-120b-a12b:free"},
         "trigger": {
             "piece": "@activepieces/piece-mcp", "version": "0.0.21",
             "name": "mcp_tool",
@@ -349,6 +474,7 @@ FLOWS = {
         },
         "reply": "mcp",
         "return_response": False,
+        "log_to_tables": True,
     },
     # Daily digest: schedule trigger + Code step that pulls recent open
     # issues per repo and asks the model to summarize. Slack/Discord post is
@@ -358,7 +484,7 @@ FLOWS = {
         "vars": {"TRIAGE_MODEL": "TRIAGE_MODEL",
                  "GITHUB_PAT": "GITHUB_PAT",
                  "OPENROUTER_API_KEY": "OPENROUTER_API_KEY"},
-        "defaults": {"TRIAGE_MODEL": "deepseek/deepseek-v4-flash-0731:free"},
+        "defaults": {"TRIAGE_MODEL": "nvidia/nemotron-3-super-120b-a12b:free"},
         "trigger": {"piece": "@activepieces/piece-schedule", "version": "0.1.22",
                     "name": "every_day",
                     "input": {"hour_of_the_day": 9, "timezone": "Asia/Kolkata",
@@ -379,9 +505,16 @@ def main() -> None:
     ap.add_argument("flow", nargs="?")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--list", action="store_true")
+    ap.add_argument("--seed-tables", action="store_true",
+                    help="(re)create the Cloud runs table with its fields")
     args = ap.parse_args()
     if args.list:
         print(json.dumps(sorted(FLOWS), indent=2))
+        return
+    if args.seed_tables:
+        tid = seed_runs_table()
+        print(json.dumps({"runs_table_id": tid,
+                          "note": "update RUNS_TABLE_ID if it changed"}))
         return
     names = list(FLOWS) if args.all else [args.flow]
     if not names or names == [None]:

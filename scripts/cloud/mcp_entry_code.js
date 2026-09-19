@@ -1,6 +1,6 @@
 export const code = async (inputs) => {
   const t0 = Date.now();
-  const model = inputs.model || "deepseek/deepseek-v4-flash-0731:free";
+  const model = inputs.model || "nvidia/nemotron-3-super-120b-a12b:free";
   const ghToken = inputs.github_pat || "";
   const orKey = inputs.openrouter_key || "";
   const toolsUsed = [];
@@ -153,65 +153,106 @@ export const code = async (inputs) => {
   const user = "Repo: " + repo + "\nURL: " + issueUrl + "\n" + context + "\n\nDuplicate candidates:\n" + candText;
 
   let output;
+  let usedModel = model;
+  // Free pools rotate (a model can flip to paid overnight). Try the requested
+  // model, then known-good free fallbacks, before holding for a human.
+  const MODELS = [inputs.model,
+                  "nvidia/nemotron-3-super-120b-a12b:free",
+                  "inclusionai/ling-3.0-flash-vl:free",
+                  "nex-agi/nex-n2.5-pro:free",
+                  "qwen/qwen3.8-27b:free"]
+    .filter((m, i, a) => m && a.indexOf(m) === i);
+  let lastErr = "no model attempted";
   try {
     if (!orKey) throw new Error("missing openrouter key");
-    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + orKey,
-        "HTTP-Referer": "https://github.com/Deepjyoti-Sarmah",
-        "X-Title": "TriagePilot",
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-        temperature: 0.2,
-        response_format: { type: "json_object" },
-      }),
-    });
-    if (!res.ok) throw new Error("openrouter " + res.status);
-    const data = await res.json();
-    const text = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
-    const parsed = extractJson(text);
-    if (!parsed || typeof parsed !== "object") throw new Error("bad model JSON");
-    toolsUsed.push("openrouter.chat");
-    const type = TYPE_ENUM.includes(parsed.issue_type) ? parsed.issue_type : "question";
-    const severity = SEV_ENUM.includes(parsed.severity) ? parsed.severity : "P3";
-    let duplicateOf = Number.isInteger(parsed.duplicate_of) ? parsed.duplicate_of : null;
-    if (type !== "duplicate") duplicateOf = null;
-    if (type === "duplicate" && duplicateOf == null && candidates.length) duplicateOf = candidates[0].number;
-    const confidence = clamp(Number(parsed.confidence) || 0, 0, 1);
-    const labels = Array.isArray(parsed.labels) ? parsed.labels.map(asString).filter(Boolean).slice(0, 6) : [];
-    let draft = asString(parsed.draft_reply).trim();
-    if (draft.length < 10) draft = "Thanks for the report. A maintainer will take a look shortly.";
-    if (draft.length > 2000) draft = draft.slice(0, 1990) + " ...";
-    output = {
-      repo,
-      issue_type: type,
-      severity,
-      confidence,
-      duplicate_of: duplicateOf,
-      labels,
-      draft_reply: draft,
-      needs_human: Boolean(parsed.needs_human) || confidence < 0.8 || severity === "P0",
-    };
+    for (const candidate of MODELS) {
+      try {
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + orKey,
+            "HTTP-Referer": "https://github.com/Deepjyoti-Sarmah",
+            "X-Title": "TriagePilot",
+          },
+          body: JSON.stringify({
+            model: candidate,
+            messages: [
+              { role: "system", content: system },
+              { role: "user", content: user },
+            ],
+            temperature: 0.2,
+            response_format: { type: "json_object" },
+          }),
+        });
+        if (!res.ok) { lastErr = "openrouter " + res.status + " (" + candidate + ")"; continue; }
+        const data = await res.json();
+        const text = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "";
+        const parsed = extractJson(text);
+        if (!parsed || typeof parsed !== "object") { lastErr = "bad model JSON (" + candidate + ")"; continue; }
+        usedModel = candidate;
+        toolsUsed.push("openrouter.chat:" + candidate);
+        const type = TYPE_ENUM.includes(parsed.issue_type) ? parsed.issue_type : "question";
+        const severity = SEV_ENUM.includes(parsed.severity) ? parsed.severity : "P3";
+        let duplicateOf = Number.isInteger(parsed.duplicate_of) ? parsed.duplicate_of : null;
+        if (type !== "duplicate") duplicateOf = null;
+        if (type === "duplicate" && duplicateOf == null && candidates.length) duplicateOf = candidates[0].number;
+        const confidence = clamp(Number(parsed.confidence) || 0, 0, 1);
+        const labels = Array.isArray(parsed.labels) ? parsed.labels.map(asString).filter(Boolean).slice(0, 6) : [];
+        let draft = asString(parsed.draft_reply).trim();
+        if (draft.length < 10) draft = "Thanks for the report. A maintainer will take a look shortly.";
+        if (draft.length > 2000) draft = draft.slice(0, 1990) + " ...";
+        output = {
+          repo,
+          issue_type: type,
+          severity,
+          confidence,
+          duplicate_of: duplicateOf,
+          labels,
+          draft_reply: draft,
+          needs_human: Boolean(parsed.needs_human) || confidence < 0.8 || severity === "P0",
+        };
+        break;
+      } catch (inner) {
+        lastErr = String(inner && inner.message ? inner.message : inner);
+      }
+    }
+    if (!output) throw new Error(lastErr);
   } catch (e) {
     output = hold(repo, String(e && e.message ? e.message : e));
   }
+
+  // One row for the Cloud "runs" table (cost/audit log). Field names must
+  // match the schema created by scripts/cloud/build_flows.py --seed-tables.
+  const record = [{
+    run_id: "ap-" + t0,
+    created_at: new Date(t0).toISOString(),
+    repo,
+    input_url: issueUrl,
+    issue_type: output.issue_type,
+    severity: output.severity,
+    confidence: output.confidence,
+    duplicate_of: output.duplicate_of,
+    needs_human: output.needs_human ? "true" : "false",
+    labels: (output.labels || []).join(", "),
+    provider: "activepieces",
+    model: usedModel,
+    mode: "live-agent",
+    latency_ms: Date.now() - t0,
+    tools_used: toolsUsed.join(", "),
+    approved_by: "",
+  }];
 
   return {
     output,
     meta: {
       provider: "activepieces",
-      model,
+      model: usedModel,
       mode: "live-agent",
       latency_ms: Date.now() - t0,
       tools_used: toolsUsed,
       duplicate_candidates: candidates,
     },
+    record,
   };
 };

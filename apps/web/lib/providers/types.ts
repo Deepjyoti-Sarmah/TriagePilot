@@ -25,7 +25,7 @@ export type TriageResult = {
 export interface TriageProvider {
   /** stable id, also the TRIAGE_PROVIDER value + meta.provider */
   readonly name: string;
-  /** model id for meta + logging, e.g. "deepseek/deepseek-v4-flash-0731:free" */
+  /** model id for meta + logging, e.g. "nvidia/nemotron-3-super-120b-a12b:free" */
   readonly model: string;
   triage(input: TriageInput): Promise<TriageResult>;
 }

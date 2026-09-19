@@ -4,11 +4,39 @@ import { RunsTable, type Run } from "@/components/runs-table";
 
 export const dynamic = "force-dynamic";
 
+const RUNS_TABLE_ID = process.env.AP_RUNS_TABLE_ID || "lXtUJFNQlOLJN8y9ITzzu";
+
 async function loadRuns(): Promise<{ runs: Run[]; live: boolean }> {
-  // Live path (D4): read Tables `runs` via AP_API_KEY. Until keys exist,
-  // fall back to deterministic mock rows so the page is reviewable keyless.
-  if (process.env.AP_API_KEY && process.env.AP_PROJECT_ID) {
-    return { runs: [], live: true };
+  // Live path: the Cloud runs table is appended by the triage flow's
+  // "Log run" step (provider/model/latency/tokens columns). Falls back to
+  // deterministic mock rows so the page stays reviewable keyless.
+  const key = process.env.AP_API_KEY;
+  if (key && RUNS_TABLE_ID) {
+    try {
+      const res = await fetch(
+        `https://cloud.activepieces.com/api/v1/tables/${RUNS_TABLE_ID}/export`,
+        { headers: { Authorization: `Bearer ${key}` }, cache: "no-store" }
+      );
+      if (res.ok) {
+        const data = await res.json().catch(() => null);
+        const rows: Run[] = (data?.rows ?? [])
+          .map((r: Record<string, unknown>) => ({
+            run_id: String(r.run_id ?? ""),
+            repo: String(r.repo ?? ""),
+            input_url: String(r.input_url ?? ""),
+            issue_type: String(r.issue_type ?? ""),
+            severity: String(r.severity ?? ""),
+            confidence: Number(r.confidence) || 0,
+            latency_ms: Number(r.latency_ms) || 0,
+            approved_by: r.approved_by ? String(r.approved_by) : null,
+          }))
+          .reverse()
+          .slice(0, 50);
+        return { runs: rows, live: true };
+      }
+    } catch {
+      /* fall through to mock */
+    }
   }
   return { runs: mockRuns() as Run[], live: false };
 }
