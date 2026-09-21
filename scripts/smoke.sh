@@ -112,6 +112,11 @@ print('repo-issues contract ok:', 'live-shape' if ok_200 else 'not_wired-501')" 
 echo ""
 echo "— python backend (spec 008) —"
 cd "$ROOT_DIR/apps/api"
+if ! python3 -c "import fastapi, uvicorn, pydantic, httpx" 2>/dev/null; then
+  bad "api deps" "pip install -r apps/api/requirements.txt (fastapi/uvicorn/pydantic/httpx missing)"
+  exit 1
+fi
+ok "api deps present"
 TRIAGE_PROVIDER=mock setsid nohup python3 -m uvicorn app.main:app --port "$API_PORT" >/tmp/smoke-api.log 2>&1 < /dev/null & disown
 API_PID=$!
 ABOOTED=0

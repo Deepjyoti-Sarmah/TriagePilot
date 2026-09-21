@@ -28,6 +28,10 @@ jobs:
           node-version: "24"
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - run: npm ci --no-audit --no-fund
+      - run: pip install -r ../api/requirements.txt
       - run: npm run build
       - run: bash ../../scripts/smoke.sh 3210
