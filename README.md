@@ -17,6 +17,13 @@ You ── repo/issue link ──▶ Next.js console ──▶ FastAPI backend �
 - **Activepieces Cloud**: 4 flows (webhook intake, MCP entry, MCP tool, daily digest) + 4 tables (memory, runs log). Webhook path is the programmatic entry; MCP trigger serves Cursor/Claude
 - **Evals that matter**: 80 labeled rows, accuracy gate 0.8 — passed twice live (0.800 direct, 0.909 flow). Artifacts in `specs/001-maintainer-agent/evals/`
 
+## Shipped on Activepieces Cloud (not a wrapper — native)
+
+- **4 published flows** (`flows/*.json` are the real exports): webhook intake, MCP entry, MCP tool trigger (`triage_github_issue` for Cursor/Claude), daily digest
+- **4 live tables**: `issues_memory` (persistent verdict memory), `runs` (cost/audit log), plus repos + digests
+- **Proven live**: miss (bug/P2, 14s LLM) → hit (identical verdict, 0ms, `tools_used: memory-hit`); cross-repo isolation; every run logged with provider/model/latency
+- **Built programmatically** via the public API (`scripts/cloud/build_flows.py`): Code steps, Tables piece actions, Router-free branching, project Variables for secrets — the same surface a builder UI clicks, versioned in git
+
 ## Deploy on Vercel (10 minutes)
 
 1. Push this repo to GitHub, import in Vercel (framework preset: Next.js, root directory: `apps/web`)
